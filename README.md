@@ -134,7 +134,7 @@ Want to see new features of the latest version? Please refer to [CHANGELOG](docs
 
 #### macOS
 
-You can either download the latest `marktext-%version%.dmg` from the [release page](https://github.com/marktext/marktext/releases/latest) or install MarkText using [**homebrew cask**](https://github.com/caskroom/homebrew-cask). To use Homebrew-Cask you just need to have [Homebrew](https://brew.sh/) installed.
+You can either download the latest `marktext-%version%.dmg` from the [release page](https://github.com/marktext/marktext/releases/latest) or install MarkText using [**homebrew cask**](https://github.com/caskroom/homebrew-cask). To use Homebrew-Cask you just need to have [Homebrew](https://brew.sh/) installed. This cask is for macOS only; Linux users should follow the Linux installation instructions below.
 
 ```bash
 brew install --cask mark-text
@@ -158,7 +158,7 @@ winget install marktext
 
 #### Linux
 
-Please follow the [Linux installation instructions](docs/end-user/LINUX.md).
+Please follow the [Linux installation instructions](docs/end-user/LINUX.md). Homebrew on Linux support is being prepared separately from the macOS-only `mark-text` cask.
 
 #### Other
 
