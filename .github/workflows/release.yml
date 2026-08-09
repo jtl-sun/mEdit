@@ -42,7 +42,7 @@ jobs:
             os: ubuntu-22.04
             platform: linux
           - name: windows-x64
-            os: windows-latest
+            os: windows-2022
             platform: windows
             arch: x64
           - name: windows-arm64
@@ -80,7 +80,19 @@ jobs:
         uses: ./.github/actions/setup
         with:
           node-version: '24.14.1'
+      
+      - name: Install Visual Studio Build Tools
+        if: matrix.platform == 'windows'
+        uses: microsoft/setup-msbuild@v2
 
+      - name: Setup Windows build tools
+        if: matrix.platform == 'windows'
+        uses: ilammy/msvc-dev-cmd@v1
+    
+      - name: Set GYP_MSVS_VERSION
+        if: matrix.platform == 'windows'
+        run: echo "GYP_MSVS_VERSION=2022" >> $GITHUB_ENV
+     
       # Cache Electron binary; key on package.json so it busts when Electron version changes.
       - name: Cache Electron binary
         uses: actions/cache@v4.3.0
@@ -98,7 +110,7 @@ jobs:
         if: matrix.platform == 'macos'
         run: |
           echo "CXXFLAGS=-std=gnu++20 -stdlib=libc++" >> $GITHUB_ENV
-
+         
       # Run the full postinstall: Electron binary download, patch-package,
       # electron-rebuild, and minify-locales.
       - name: Run postinstall
@@ -107,7 +119,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           npm_config_user_agent: 'pnpm'
           USE_ELECTRON_CLANG: ${{ matrix.platform == 'linux' && '0' || '' }}
-
+          GYP_MSVS_VERSION: '2022' 
+          
       - name: build-linux
         if: matrix.platform == 'linux'
         run: pnpm run build:linux

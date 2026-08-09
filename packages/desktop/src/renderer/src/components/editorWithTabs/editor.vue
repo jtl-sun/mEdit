@@ -2,7 +2,8 @@
   <div
     class="editor-wrapper"
     :class="[{ typewriter: typewriter, focus: focus, source: sourceCode }]"
-    :dir="textDirection"
+    :dir="textDirection === 'auto' ? undefined : textDirection"
+    :data-text-direction="textDirection"
   >
     <div
       ref="editorRef"
@@ -1691,6 +1692,14 @@ const handleLanguageChanged = (newLocale?: unknown) => {
 }
 const resizeObserverForEditor = new ResizeObserver(handleResetPaddingBottom)
 
+// BiDi: delegate to the Muya engine. The initial direction is passed via
+// `textDirection` in the constructor options; this watcher handles live changes.
+watch(() => props.textDirection, (dir) => {
+  if (editor.value) {
+    editor.value.setTextDirection(dir as 'ltr' | 'rtl' | 'auto')
+  }
+})
+
 onMounted(() => {
   printer = new Printer()
   const ele = editorRef.value
@@ -1767,7 +1776,8 @@ onMounted(() => {
     // Without these, local-file drag-drop, screenshot/binary clipboard paste, and
     // copy-to-assets on a pasted image file silently no-op or insert raw paths.
     imageAction: muyaImageAction,
-    getPathForFile: (file: File) => window.electron.webUtils.getPathForFile(file)
+    getPathForFile: (file: File) => window.electron.webUtils.getPathForFile(file),
+    textDirection: props.textDirection as 'ltr' | 'rtl' | 'auto'
   }
 
   if (/dark/i.test(theme.value)) {
@@ -2019,6 +2029,11 @@ onBeforeUnmount(() => {
   scrollHandler = null
 
   resizeObserverForEditor.disconnect()
+
+  if (bidiObserver) {
+    bidiObserver.disconnect()
+    bidiObserver = null
+  }
 
   if (imageViewer) {
     imageViewer.destroy()

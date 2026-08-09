@@ -98,16 +98,24 @@ const handleSwitchChange = (value: boolean | string | number) => {
       margin-left: 4px;
       cursor: pointer;
       opacity: 0.7;
-      color: var(--iconColor);
+      &:hover {
+        opacity: 1;
+      }
     }
-    & svg:hover {
-      color: var(--themeColor);
-    }
-    & > .notes {
-      display: inline;
-      margin: 0 0 0 8px;
+    & .notes {
+      margin-left: 4px;
+      font-size: 12px;
+      opacity: 0.7;
     }
   }
+}
+
+/* Fix toggle switch circle visibility to match design language */
+.el-switch:not(.is-checked) .el-switch__core .el-switch__action {
+  background-color: var(--iconColor) !important;
+}
+.el-switch.is-checked .el-switch__core .el-switch__action {
+  background-color: #ffffff !important;
 }
 
 span.el-switch__core::after {
