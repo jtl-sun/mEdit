@@ -29,6 +29,9 @@ export const useListenForMainStore = defineStore('listenForMain', () => {
     window.electron.ipcRenderer.on('mt::about-dialog', () => {
       bus.emit('aboutDialog')
     })
+    window.electron.ipcRenderer.on('mt::markdown-guide-dialog', () => {
+      bus.emit('markdownGuideDialog')
+    })
     window.electron.ipcRenderer.on('mt::show-export-dialog', (_e, type) => {
       bus.emit('showExportDialog', type)
     })

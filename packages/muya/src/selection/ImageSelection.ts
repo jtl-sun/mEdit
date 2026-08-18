@@ -3,9 +3,11 @@ import type { Muya } from '../muya';
 import type Selection from './index';
 import type { IImageSelectionData } from './types';
 import { BLOCK_DOM_PROPERTY, CLASS_NAMES } from '../config';
+import { LINK_SELECTOR } from '../editor/linkMouseEvents';
 import { isHTMLElement, isKeyboardEvent } from '../utils';
 import { getImageInfo, getImageSrc } from '../utils/image';
 import { findContentDOM } from './dom';
+import { SelectionType } from './types';
 
 class ImageSelection {
     selected: IImageSelectionData | null = null;
@@ -56,7 +58,7 @@ class ImageSelection {
             event.preventDefault();
             const { block, ...imageInfo } = selected;
             block.deleteImage(imageInfo);
-            this._selection.activate('text');
+            this._selection.activate(SelectionType.TEXT);
         }
     };
 
@@ -101,7 +103,17 @@ class ImageSelection {
         }
 
         if (isHTMLElement(target) && target.tagName === 'IMG') {
-            if (event instanceof MouseEvent && (event.metaKey || event.ctrlKey)) {
+            // A linked image (e.g. `[![alt](src)](href)`) renders its image
+            // wrapper inside a link element. On modifier-click the link handler
+            // (linkMouseEvents) opens the URL; don't also emit the image preview,
+            // which would pop a viewer over the navigation (#3835). Reuse
+            // linkMouseEvents' selector so every link variant is covered (plain,
+            // reference, autolink, raw-HTML anchor), not just `mu-link`.
+            if (
+                event instanceof MouseEvent
+                && (event.metaKey || event.ctrlKey)
+                && !imageWrapper.closest(LINK_SELECTOR)
+            ) {
                 const tokenSrc = imageInfo.token.src || imageInfo.token.attrs.src || '';
                 const src = getImageSrc(tokenSrc).src || target.getAttribute('src') || '';
                 if (src) {
@@ -128,10 +140,13 @@ class ImageSelection {
                 imageInfo,
             });
 
-            const imageSelector = `#${imageInfo.imageId}`;
-
-            const imageContainer = document.querySelector(
-                `${imageSelector} .${CLASS_NAMES.MU_IMAGE_CONTAINER}`,
+            // Resolve the image container from the clicked wrapper directly.
+            // Images that share the same src (and paragraph offset) render with
+            // duplicate DOM ids, so a `document.querySelector('#id ...')` lookup
+            // would resolve to the first occurrence and place the resize bar on
+            // the wrong image.
+            const imageContainer = imageWrapper.querySelector(
+                `.${CLASS_NAMES.MU_IMAGE_CONTAINER}`,
             );
 
             eventCenter.emit('muya-transformer', {

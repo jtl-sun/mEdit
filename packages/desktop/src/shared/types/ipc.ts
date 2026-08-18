@@ -132,6 +132,7 @@ export interface IpcSendChannels {
   'mt::open-setting-window': []
   'mt::rename': [payload: { id: string; pathname: string; newPathname: string; currentFile?: unknown }]
   'mt::request-keybindings': []
+  'mt::set-editor-format-menus-enabled': [windowId: number, enabled: boolean]
   'mt::response-export': [
     payload: {
       type: ExportType
@@ -220,6 +221,7 @@ export interface IpcMainEventChannels {
   'mt::UPDATE_ERROR': [error: unknown]
   'mt::UPDATE_NOT_AVAILABLE': [info?: unknown]
   'mt::about-dialog': []
+  'mt::markdown-guide-dialog': []
   'mt::ask-for-close': []
   'mt::bootstrap-editor': [config: BootstrapEditorConfig]
   'mt::cm-copy-as-html': []
@@ -258,7 +260,7 @@ export interface IpcMainEventChannels {
   'mt::rg::error': [payload: unknown]
   'mt::rg::match': [payload: unknown]
   'mt::rg::progress': [payload: unknown]
-  'mt::screenshot-captured': []
+  'mt::screenshot-captured': [filePath: string]
   'mt::set-line-ending': [lineEnding: LineEnding]
   'mt::set-pathname': [payload: { id: string; pathname: string; filename: string }]
   'mt::set-view-layout': [layout: unknown]

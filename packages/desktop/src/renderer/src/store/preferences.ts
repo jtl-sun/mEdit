@@ -80,6 +80,7 @@ export interface PreferencesState {
   isHtmlEnabled: boolean
   isGitlabCompatibilityEnabled: boolean
   sequenceTheme: SequenceTheme | string
+  plantumlServer: string
 
   // ----- Theme -----
   theme: string
@@ -140,7 +141,7 @@ export const usePreferencesStore = defineStore('preferences', {
   state: (): PreferencesState => ({
     autoSave: false,
     autoSaveDelay: 5000,
-    titleBarStyle: 'custom',
+    titleBarStyle: 'native',
     openFilesInNewWindow: false,
     openFolderInNewWindow: false,
     zoom: 1.0,
@@ -195,6 +196,7 @@ export const usePreferencesStore = defineStore('preferences', {
     isHtmlEnabled: true,
     isGitlabCompatibilityEnabled: false,
     sequenceTheme: 'hand',
+    plantumlServer: 'https://www.plantuml.com/plantuml',
 
     theme: 'light',
     followSystemTheme: true,
@@ -224,7 +226,7 @@ export const usePreferencesStore = defineStore('preferences', {
 
     // Edit modes of the current window (not part of persistent settings)
     typewriter: false, // typewriter mode
-    focus: false, // focus mode
+    focus: false,
     sourceCode: false, // source code mode
 
     // user configration

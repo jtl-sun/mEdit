@@ -13,7 +13,7 @@
   "titleBarStyle": {
     "description": "General--The title bar style (Windows and Linux system only).",
     "enum": ["custom", "native"],
-    "default": "custom"
+    "default": "native"
   },
   "openFilesInNewWindow": {
     "description": "General--Open files in a new window.",
@@ -54,11 +54,11 @@
     "default": "asc"
   },
   "lastOpenedFolder": {
-    "description": "General--The last folder that was opened in MarkText.--internal",
+    "description": "General--The last folder that was opened in mEdit.--internal",
     "type": "string"
   },
   "startUpAction": {
-    "description": "General--The action after MarkText startup, open the last opened folder, open the specified folder or blank page",
+    "description": "General--The action after mEdit startup, open the last opened folder, open the specified folder or blank page",
     "enum": ["folder", "openLastFolder", "blank", "restoreAll"],
     "default": "restoreAll"
   },
@@ -67,7 +67,7 @@
     "type": "string"
   },
   "language": {
-    "description": "General--The language MarkText use.",
+    "description": "General--The language mEdit uses.",
     "type": "string",
     "default": "en"
   },
@@ -233,12 +233,12 @@
     "default": "-"
   },
   "orderListDelimiter": {
-    "description": "Markdown--The dilimiter used in order list",
+    "description": "Markdown--The delimiter used in order list",
     "enum": [".", ")"],
     "default": "."
   },
   "preferHeadingStyle": {
-    "description": "Markdown--The preferred heading style in MarkText",
+    "description": "Markdown--The preferred heading style in mEdit",
     "enum": ["atx", "setext"],
     "default": "atx"
   },
@@ -282,8 +282,14 @@
     "enum": ["hand", "simple"],
     "default": "hand"
   },
+  "plantumlServer": {
+    "description": "Markdown--PlantUML server URL for rendering diagrams",
+    "type": "string",
+    "pattern": "^(https?://|$)",
+    "default": "https://www.plantuml.com/plantuml"
+  },
   "theme": {
-    "description": "Theme--Select the theme used in MarkText",
+    "description": "Theme--Select the theme used in mEdit",
     "type": "string",
     "default": "light"
   },

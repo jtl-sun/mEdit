@@ -1,6 +1,3 @@
-import type Parent from '../../block/base/parent';
-import type { Muya } from '../../index';
-import type { IFrontmatterMeta } from '../../state/types';
 import bulletListIcon from '../../assets/icons/bullet_list/2.png';
 import vegaIcon from '../../assets/icons/chart/2.png';
 import codeIcon from '../../assets/icons/code/2.png';
@@ -24,64 +21,8 @@ import quoteIcon from '../../assets/icons/quote_block/2.png';
 import sequenceIcon from '../../assets/icons/sequence/2.png';
 
 import todoListIcon from '../../assets/icons/todolist/2.png';
-import { ScrollPage } from '../../block/scrollPage';
 import { isOsx } from '../../config';
-
-import emptyStates from '../../config/emptyStates';
-import { getCursorReference } from '../../selection';
-import { isParagraphState } from '../../state/types';
-import { deepClone, isKeyboardEvent } from '../../utils';
-import logger from '../../utils/logger';
-
-const debug = logger('quickInsert:');
-
-/**
- * Derive the frontmatter `lang`/`style` from the user's `frontmatterType`
- * preference: `-` -> yaml `---`, `+` -> toml `+++`,
- * `;`/`{` -> json (`;;;`/`{}`). The serializer (`serializeFrontMatter`)
- * switches on `lang`, so getting `lang` right is what makes YAML/TOML emit
- * their fences instead of falling through to JSON braces.
- */
-export function frontmatterMeta(frontmatterType: string): IFrontmatterMeta {
-    switch (frontmatterType) {
-        case '+':
-            return { lang: 'toml', style: '+' };
-        case ';':
-            return { lang: 'json', style: ';' };
-        case '{':
-            return { lang: 'json', style: '{' };
-        case '-':
-        default:
-            return { lang: 'yaml', style: '-' };
-    }
-}
-
-/**
- * Prepend a front matter block at the very start of the document. Front matter
- * is only valid as the first
- * block, so this never replaces the block at the cursor. Idempotent: a no-op
- * when the document already starts with front matter, so it never duplicates
- * the block. Shared by `Muya.updateParagraph('front-matter')` and the
- * quick-insert menu's `frontmatter` entry so both follow identical semantics.
- */
-export function insertFrontMatterAtStart(muya: Muya): boolean {
-    const { scrollPage } = muya.editor;
-    if (!scrollPage)
-        return false;
-
-    const firstBlock = scrollPage.firstChild as Parent | null;
-    if (firstBlock?.blockName === 'frontmatter')
-        return false;
-
-    const fmState = deepClone(emptyStates.frontmatter);
-    Object.assign(fmState.meta, frontmatterMeta(muya.options.frontmatterType));
-
-    const frontmatter = ScrollPage.loadBlock('frontmatter').create(muya, fmState);
-    scrollPage.insertBefore(frontmatter, firstBlock);
-    frontmatter.firstContentInDescendant()?.setCursor(0, 0, true);
-
-    return true;
-}
+import { isKeyboardEvent } from '../../utils';
 
 const COMMAND_KEY = isOsx ? '⌘' : 'Ctrl';
 const OPTION_KEY = isOsx ? '⌥' : 'Alt';
@@ -159,10 +100,10 @@ export const MENU_CONFIG: IQuickInsertMenuItem[] = [
         ],
     },
     {
-        name: 'headers',
+        name: 'headings',
         children: [
             {
-                title: 'Header 1',
+                title: 'Heading 1',
                 subTitle: '# Lorem Ipsum...',
                 label: 'atx-heading 1',
                 shortCut: `${COMMAND_KEY}+1`,
@@ -175,7 +116,7 @@ export const MENU_CONFIG: IQuickInsertMenuItem[] = [
                 icon: header1Icon,
             },
             {
-                title: 'Header 2',
+                title: 'Heading 2',
                 subTitle: '## Lorem Ipsum...',
                 label: 'atx-heading 2',
                 shortCut: `${COMMAND_KEY}+2`,
@@ -188,7 +129,7 @@ export const MENU_CONFIG: IQuickInsertMenuItem[] = [
                 icon: header2Icon,
             },
             {
-                title: 'Header 3',
+                title: 'Heading 3',
                 subTitle: '### Lorem Ipsum...',
                 label: 'atx-heading 3',
                 shortCut: `${COMMAND_KEY}+3`,
@@ -201,7 +142,7 @@ export const MENU_CONFIG: IQuickInsertMenuItem[] = [
                 icon: header3Icon,
             },
             {
-                title: 'Header 4',
+                title: 'Heading 4',
                 subTitle: '#### Lorem Ipsum...',
                 label: 'atx-heading 4',
                 shortCut: `${COMMAND_KEY}+4`,
@@ -214,7 +155,7 @@ export const MENU_CONFIG: IQuickInsertMenuItem[] = [
                 icon: header4Icon,
             },
             {
-                title: 'Header 5',
+                title: 'Heading 5',
                 subTitle: '##### Lorem Ipsum...',
                 label: 'atx-heading 5',
                 shortCut: `${COMMAND_KEY}+5`,
@@ -227,7 +168,7 @@ export const MENU_CONFIG: IQuickInsertMenuItem[] = [
                 icon: header5Icon,
             },
             {
-                title: 'Header 6',
+                title: 'Heading 6',
                 subTitle: '###### Lorem Ipsum...',
                 label: 'atx-heading 6',
                 shortCut: `${COMMAND_KEY}+6`,
@@ -416,201 +357,4 @@ export function getLabelFromEvent(event: Event) {
 
     if (result)
         return result.label;
-}
-
-/**
- * Show the in-editor table grid picker. The in-editor "table" insert (the `/`
- * quick-insert menu and the paragraph front-menu) must offer a hover-grid
- * dimension picker rather than dropping a fixed-size table — the picker UI
- * (`TableChessboard`) subscribes to `muya-table-picker` and invokes the
- * dispatched callback with the zero-based `(row, column)` the user picked, so
- * the table is created at `row + 1 × column + 1` to match legacy semantics.
- *
- * The float anchors to the caret (`getCursorReference`); when the cursor has
- * no coords (e.g. the front-menu took focus) it falls back to the block's DOM
- * node. No-op if neither is available.
- */
-export function showTablePicker(muya: Muya, block: Parent) {
-    const { eventCenter } = muya;
-    const reference = getCursorReference() ?? block.domNode;
-    if (!reference)
-        return;
-
-    const handler = (row: number, column: number) => {
-        muya.createTable({ rows: row + 1, columns: column + 1 });
-    };
-
-    eventCenter.emit('muya-table-picker', { row: -1, column: -1 }, reference, handler);
-}
-
-export function replaceBlockByLabel({ block, muya, label, text = '' }: {
-    block: Parent;
-    muya: Muya;
-    label: string;
-    text?: string;
-}) {
-    const {
-        preferLooseListItem,
-        bulletListMarker,
-        orderListDelimiter,
-    } = muya.options;
-    let newBlock = null;
-    let state = null;
-    let cursorBlock = null;
-
-    // Front matter is only valid as the document's first block, so the
-    // quick-insert "Front Matter" entry must NOT replace the cursor block in
-    // place (which destroyed its content and produced invalid mid-document
-    // front matter). Prepend at document start and bail before the in-place
-    // `block.replaceWith` below — sharing the idempotent doc-start logic with
-    // `Muya.updateParagraph('front-matter')`.
-    if (label === 'frontmatter') {
-        // Every other label drops the `/` quick-insert trigger text implicitly
-        // via `block.replaceWith(newBlock)`. Front matter is prepended at the
-        // document start instead (the trigger paragraph survives), so clear its
-        // `/…` text and refresh the DOM. Only do so when a block was actually
-        // inserted — when the document already starts with front matter the
-        // insert is a no-op and the trigger paragraph must be left untouched.
-        if (insertFrontMatterAtStart(muya)) {
-            const triggerContent = block.firstContentInDescendant();
-            if (triggerContent) {
-                triggerContent.text = '';
-                triggerContent.update();
-            }
-        }
-        return;
-    }
-
-    // The in-editor "table" insert shows a hover-grid dimension picker
-    // instead of dropping a fixed-size
-    // table. The picker's callback creates the table at the chosen size, so
-    // bail before the in-place empty-table replacement below.
-    if (label === 'table') {
-        showTablePicker(muya, block);
-        return;
-    }
-
-    switch (label) {
-        case 'paragraph':
-            // fall through
-        case 'thematic-break':
-            // fall through
-        case 'math-block':
-            // fall through
-        case 'html-block':
-            // fall through
-        case 'code-block':
-            // fall through
-        case 'block-quote': {
-            const cloned = deepClone(emptyStates[label]);
-            if (cloned.name === 'paragraph') {
-                cloned.text = text;
-            }
-            else if (cloned.name === 'block-quote') {
-                const inner = cloned.children[0];
-                if (isParagraphState(inner))
-                    inner.text = text;
-            }
-            state = cloned;
-            newBlock = ScrollPage.loadBlock(label).create(muya, state);
-            break;
-        }
-
-        case 'atx-heading 1':
-            // fall through
-        case 'atx-heading 2':
-            // fall through
-        case 'atx-heading 3':
-            // fall through
-        case 'atx-heading 4':
-            // fall through
-        case 'atx-heading 5':
-            // fall through
-        case 'atx-heading 6': {
-            const headingState = deepClone(emptyStates['atx-heading']);
-
-            const [blockName, level] = label.split(' ');
-            headingState.meta.level = +level;
-            headingState.text = `${'#'.repeat(+level)} ${text}`;
-            state = headingState;
-            newBlock = ScrollPage.loadBlock(blockName).create(muya, state);
-            break;
-        }
-
-        case 'order-list': {
-            const orderState = deepClone(emptyStates[label]);
-            orderState.meta.loose = preferLooseListItem;
-            orderState.meta.delimiter = orderListDelimiter;
-            const firstChild = orderState.children[0].children[0];
-            if (text && isParagraphState(firstChild))
-                firstChild.text = text;
-
-            state = orderState;
-            newBlock = ScrollPage.loadBlock(label).create(muya, state);
-            break;
-        }
-
-        case 'bullet-list':
-            // fall through
-        case 'task-list': {
-            const listState = deepClone(emptyStates[label]);
-            listState.meta.loose = preferLooseListItem;
-            listState.meta.marker = bulletListMarker;
-            const firstChild = listState.children[0].children[0];
-            if (text && isParagraphState(firstChild))
-                firstChild.text = text;
-
-            state = listState;
-            newBlock = ScrollPage.loadBlock(label).create(muya, state);
-            break;
-        }
-
-        case 'diagram vega-lite':
-            // fall through
-        case 'diagram mermaid':
-            // fall through
-        case 'diagram plantuml':
-            // fall through
-        case 'diagram flowchart':
-            // fall through
-        case 'diagram sequence': {
-            const diagramState = deepClone(emptyStates.diagram);
-
-            const [name, type] = label.split(' ');
-            if (
-                type === 'mermaid'
-                || type === 'plantuml'
-                || type === 'vega-lite'
-                || type === 'flowchart'
-                || type === 'sequence'
-            ) {
-                diagramState.meta.type = type;
-                diagramState.meta.lang = type === 'vega-lite' ? 'json' : 'yaml';
-            }
-            state = diagramState;
-            newBlock = ScrollPage.loadBlock(name).create(muya, state);
-            break;
-        }
-
-        default:
-            debug.log('Unknown label in quick insert');
-            break;
-    }
-
-    block.replaceWith(newBlock);
-    if (label === 'thematic-break') {
-        const nextParagraphBlock = ScrollPage.loadBlock('paragraph').create(
-            muya,
-            deepClone(emptyStates.paragraph),
-        );
-        newBlock.parent.insertAfter(nextParagraphBlock, newBlock);
-        cursorBlock = nextParagraphBlock.firstContentInDescendant();
-        cursorBlock.setCursor(0, 0, true);
-    }
-    else {
-        cursorBlock = newBlock.firstContentInDescendant();
-        // Set the cursor between <div>\n\n</div> when create html-block
-        const offset = label === 'html-block' ? 6 : cursorBlock.text.length;
-        cursorBlock.setCursor(offset, offset, true);
-    }
 }

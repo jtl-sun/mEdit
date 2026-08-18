@@ -9,7 +9,6 @@
 import { app, clipboard, crashReporter, dialog, ipcMain } from 'electron'
 import os from 'os'
 import log from 'electron-log'
-import { createAndOpenGitHubIssueUrl } from './utils/createGitHubIssue'
 import { t } from './i18n'
 
 type ErrorType = 'main' | 'renderer'
@@ -38,8 +37,8 @@ const exceptionToString = (error: Error, type: ErrorType): string => {
   )
 }
 
-const handleError = async(title: string, error: Error, type: ErrorType): Promise<void> => {
-  const { message, stack } = error
+const handleError = async (title: string, error: Error, type: ErrorType): Promise<void> => {
+  const { stack } = error
 
   // Write error into file
   if (type === 'main') {
@@ -64,7 +63,7 @@ const handleError = async(title: string, error: Error, type: ErrorType): Promise
     // Blocking message box
     const { response } = await dialog.showMessageBox({
       type: 'error',
-      buttons: [t('common.ok'), t('error.copyError'), t('error.report')],
+      buttons: [t('common.ok'), t('error.copyError')],
       defaultId: 0,
       noLink: true,
       message: title,
@@ -74,29 +73,6 @@ const handleError = async(title: string, error: Error, type: ErrorType): Promise
     switch (response) {
       case 1: {
         clipboard.writeText(`${title}\n${stack}`)
-        break
-      }
-      case 2: {
-        const issueTitle = message ? t('error.unexpectedErrorWithMessage', { message }) : title
-        createAndOpenGitHubIssueUrl(
-          issueTitle,
-          `### Description
-
-${title}.
-
-### Minimal Reprouducible Markdown Example (or Steps)
-
-<Add steps or a markdown example to reproduce the problem.>
-
-### Stack Trace
-
-\`\`\`\n${stack}\n\`\`\`
-
-### Version
-
-MarkText: ${MARKTEXT_VERSION_STRING}
-Operating system: ${getOSInformation()}`
-        )
         break
       }
     }
@@ -127,8 +103,8 @@ const setupExceptionHandler = (): void => {
 
   // start crashReporter to save core dumps to temporary folder
   crashReporter.start({
-    companyName: 'marktext',
-    productName: 'marktext',
+    companyName: 'mEdit',
+    productName: 'mEdit',
     submitURL: 'http://0.0.0.0/',
     uploadToServer: false,
     compress: true

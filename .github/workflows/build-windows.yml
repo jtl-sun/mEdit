@@ -1,0 +1,99 @@
+name: Build mEdit for Windows
+
+on:
+  push:
+    branches:
+      - main
+      - fix/basefloat-hide-race
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-windows-x64:
+    runs-on: windows-latest
+    timeout-minutes: 60
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24.14.1'
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Enable pnpm
+        shell: pwsh
+        run: |
+          corepack enable
+          corepack install --global pnpm@10.33.4
+
+      - name: Install dependencies
+        shell: pwsh
+        run: pnpm install --frozen-lockfile --ignore-scripts
+
+      - name: Prepare Electron native dependencies
+        shell: pwsh
+        run: pnpm tsx scripts/postinstall.ts
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          npm_config_user_agent: pnpm
+
+      - name: Verify source
+        shell: pwsh
+        run: |
+          $package = Get-Content 'packages/desktop/package.json' -Raw | ConvertFrom-Json
+          if ($package.productName -ne 'mEdit' -or $package.version -ne '0.21.1') {
+            throw "Expected mEdit 0.21.1."
+          }
+
+          $guide = Get-Content 'packages/desktop/src/renderer/src/components/markdownGuide/index.vue' -Raw
+          foreach ($requiredText in @('Markdown 빠른 안내서', '제목 만들기', '체크박스 목록', '표 만들기', '수학식')) {
+            if (-not $guide.Contains($requiredText)) {
+              throw "Markdown guide is missing: $requiredText"
+            }
+          }
+
+          $editorCss = Get-Content 'packages/muya/src/assets/styles/blockSyntax.css' -Raw
+          if ($editorCss -notmatch '(?s)\.mu-container\s*\{.*?margin:\s*0;') {
+            throw 'The editor container is not left aligned.'
+          }
+
+      - name: Verify TypeScript
+        shell: pwsh
+        run: pnpm --filter marktext typecheck
+
+      - name: Build Windows installer
+        shell: pwsh
+        run: pnpm build:win:x64
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Verify installer
+        shell: pwsh
+        run: |
+          if (-not (Test-Path 'dist/mEdit-Windows-x64-0.21.1-setup.exe')) {
+            throw 'The mEdit 0.21.1 installer was not created.'
+          }
+
+          Get-FileHash dist/*.exe, dist/*.zip -Algorithm SHA256 |
+            ForEach-Object { "$($_.Hash)  $([IO.Path]::GetFileName($_.Path))" } |
+            Set-Content dist/SHA256SUMS.txt
+
+      - name: Upload Windows files
+        uses: actions/upload-artifact@v4
+        with:
+          name: mEdit-0.21.1-Windows-x64
+          retention-days: 30
+          if-no-files-found: error
+          path: |
+            dist/*.exe
+            dist/*.zip
+            dist/SHA256SUMS.txt

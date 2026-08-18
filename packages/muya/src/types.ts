@@ -3,6 +3,10 @@ import type { TState } from './state/types';
 export interface IMuyaOptions {
     fontSize: number;
     lineHeight: number;
+    editorFontFamily?: string;
+    codeFontSize?: number;
+    codeFontFamily?: string;
+    wrapCodeBlocks?: boolean;
     focusMode: boolean;
     trimUnnecessaryCodeBlockEmptyLines: boolean;
     preferLooseListItem: boolean;
@@ -18,11 +22,13 @@ export interface IMuyaOptions {
     frontmatterType: string; // '-' | '+' | ';' | '{';
     mermaidTheme: string;
     vegaTheme: string;
+    plantumlServer: string;
     sequenceTheme: 'hand' | 'simple';
     hideQuickInsertHint: boolean;
     hideLinkPopup: boolean;
     autoCheck: boolean;
     spellcheckEnabled: boolean;
+    spellcheckHideMarks: boolean;
     superSubScript: boolean;
     footnote: boolean;
     math: boolean;

@@ -5,3 +5,9 @@ export const showAboutDialog = (win: BrowserWindow | null | undefined): void => 
     win.webContents.send('mt::about-dialog')
   }
 }
+
+export const showMarkdownGuide = (win: BrowserWindow | null | undefined): void => {
+  if (win && win.webContents) {
+    win.webContents.send('mt::markdown-guide-dialog')
+  }
+}

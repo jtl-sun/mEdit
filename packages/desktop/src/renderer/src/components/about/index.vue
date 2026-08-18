@@ -7,10 +7,7 @@
       custom-class="ag-dialog-table"
       width="400px"
     >
-      <img
-        class="logo"
-        :src="MarkTextLogo"
-      >
+      <img class="logo" :src="mEditLogo" />
       <el-row>
         <el-col :span="24">
           <h3 class="title">
@@ -22,19 +19,6 @@
             {{ store.appVersion }}
           </div>
         </el-col>
-        <el-col :span="24">
-          <div
-            class="text"
-            style="min-height: auto"
-          >
-            {{ copyright }}
-          </div>
-        </el-col>
-        <el-col :span="24">
-          <div class="text">
-            {{ copyrightContributors }}
-          </div>
-        </el-col>
       </el-row>
     </el-dialog>
   </div>
@@ -44,14 +28,8 @@
 import { ref, onMounted, onBeforeUnmount } from 'vue'
 import { useMainStore } from '@/store'
 import bus from '../../bus'
-import MarkTextLogo from '../../assets/images/logo.png'
-import { useI18n } from 'vue-i18n'
-
-const { t } = useI18n()
-
-const name = 'MarkText'
-const copyright = t('about.copyright', { year: new Date().getFullYear() })
-const copyrightContributors = t('about.copyrightContributors')
+import mEditLogo from '../../assets/images/logo.png'
+const name = 'mEdit'
 const showAboutDialog = ref(false)
 
 const store = useMainStore()

@@ -11,8 +11,8 @@ import {
 } from 'electron'
 import log from 'electron-log'
 import { isDirectory, isFile, exists } from 'common/filesystem'
-import { MARKDOWN_EXTENSIONS, isMarkdownFile } from 'common/filesystem/paths'
-import { checkUpdates, userSetting } from './marktext'
+import { MARKDOWN_EXTENSIONS, isDangerousExecutableFile, isMarkdownFile } from 'common/filesystem/paths'
+import { userSetting } from './marktext'
 import { showTabBar } from './view'
 import { COMMANDS } from '../../commands'
 import type { CommandManager } from '../../commands'
@@ -106,7 +106,15 @@ const handleResponseForExport = async(e: IpcMainEvent, payload: ExportPayload): 
   if (filePath && !canceled) {
     try {
       if (type === 'pdf') {
-        const options: Electron.PrintToPDFOptions = { printBackground: true }
+        // Build a clickable bookmark/outline tree from the document's h1-h6
+        // headings so exported PDFs have a navigation pane (#2989). The outline
+        // is derived from the tagged-PDF structure tree, so generateTaggedPDF is
+        // required — generateDocumentOutline alone produces no outline.
+        const options: Electron.PrintToPDFOptions = {
+          printBackground: true,
+          generateTaggedPDF: true,
+          generateDocumentOutline: true
+        }
         Object.assign(options, getPdfPageOptions(pageOptions))
         const data = await win.webContents.printToPDF(options)
         removePrintServiceFromWindow(win)
@@ -166,7 +174,7 @@ const handleResponseForSave = async(
 
   // If the file doesn't exist on disk add it to the recently used documents later
   // and execute file from filesystem watcher for a short time. The file may exists
-  // on disk nevertheless but is already tracked by MarkText.
+  // on disk nevertheless but is already tracked by mEdit.
   const alreadyExistOnDisk = !!pathname
 
   let filePath = pathname
@@ -350,7 +358,7 @@ ipcMain.on(
 
     // If the file doesn't exist on disk add it to the recently used documents later
     // and execute file from filesystem watcher for a short time. The file may exists
-    // on disk nevertheless but is already tracked by MarkText.
+    // on disk nevertheless but is already tracked by mEdit.
     const alreadyExistOnDisk = !!pathname
 
     let { filePath, canceled } = await dialog.showSaveDialog(win, {
@@ -575,7 +583,7 @@ interface FormatLinkPayload {
   dirname?: string
 }
 
-ipcMain.on('mt::format-link-click', (e, { data, dirname }: FormatLinkPayload) => {
+ipcMain.on('mt::format-link-click', async(e, { data, dirname }: FormatLinkPayload) => {
   if (!data || (!data.href && !data.text)) {
     return
   }
@@ -613,7 +621,7 @@ ipcMain.on('mt::format-link-click', (e, { data, dirname }: FormatLinkPayload) =>
   }
 
   if (pathname) {
-    // decodeURIComponent() CommonMark #503, allow percent encoded path names to open files. https://github.com/marktext/marktext/issues/57
+    // Allow percent-encoded path names to open files.
     pathname = path.normalize(decodeURIComponent(pathname))
     if (isMarkdownFile(pathname)) {
       const innerWin = BrowserWindow.fromWebContents(e.sender)
@@ -621,6 +629,23 @@ ipcMain.on('mt::format-link-click', (e, { data, dirname }: FormatLinkPayload) =>
         openFileOrFolder(innerWin, pathname)
       }
     } else {
+      // A link in an untrusted document could point at a co-located script or
+      // executable; opening it via the OS shell would run code silently (#3575).
+      if (isDangerousExecutableFile(pathname)) {
+        const { response } = await dialog.showMessageBox(win, {
+          type: 'warning',
+          buttons: [t('dialog.cancel'), t('dialog.openAnyway')],
+          defaultId: 0,
+          cancelId: 0,
+          noLink: true,
+          title: t('dialog.unsafeFileTitle'),
+          message: t('dialog.unsafeFileMessage'),
+          detail: t('dialog.unsafeFileDetail', { name: path.basename(pathname) })
+        })
+        if (response !== 1) {
+          return
+        }
+      }
       shell.openPath(pathname)
     }
   }
@@ -804,7 +829,6 @@ export const clearRecentlyUsed = (): void => {
 // --- Commands -------------------------------------------------------------
 
 export const loadFileCommands = (commandManager: CommandManager): void => {
-  commandManager.add(COMMANDS.FILE_CHECK_UPDATE, checkUpdates)
   commandManager.add(COMMANDS.FILE_CLOSE_TAB, closeTab)
   commandManager.add(COMMANDS.FILE_CLOSE_WINDOW, closeWindow)
   commandManager.add(COMMANDS.FILE_EXPORT_FILE, exportFile)
