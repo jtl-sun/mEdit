@@ -134,9 +134,11 @@ dmg:
 linux:
   artifactName: 'mEdit-Ubuntu-${arch}-${version}.${ext}'
   executableName: 'mEdit'
-  description: 'A simple and elegant open-source markdown editor that focused on speed and usability.'
-  maintainer: 'mEdit Contributors'
-  category: 'Office;TextEditor;Utility'
+  description: 'A simple and elegant open-source markdown editor focused on speed and usability.'
+  # Let electron-builder derive the Debian maintainer from package.json author,
+  # which includes the required contact email. A name-only maintainer is invalid
+  # for Debian package metadata and can make the DEB target fail.
+  category: 'Office'
   mimeTypes:
     - 'text/markdown'
   icon: 'static/icon.png'
