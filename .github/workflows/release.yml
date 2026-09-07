@@ -142,7 +142,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Verify Ubuntu packages and runtime metadata
+      - name: Verify Ubuntu packages and installed commands
         run: |
           set -euo pipefail
           VERSION='${{ steps.meta.outputs.app_version }}'
@@ -157,12 +157,17 @@ jobs:
           echo "DEB Depends: $DEPENDS"
           echo "$DEPENDS" | grep -Eq 'libasound2t64|libasound2'
 
-          CONTROL_DIR="$(mktemp -d)"
-          dpkg-deb -e "$DEB" "$CONTROL_DIR"
-          test -f "$CONTROL_DIR/postinst"
-          grep -q '/usr/bin/medit' "$CONTROL_DIR/postinst"
-          grep -q '/usr/bin/mEdit' "$CONTROL_DIR/postinst"
-          rm -rf "$CONTROL_DIR"
+          # Install the generated DEB and verify the actual user-facing commands.
+          # This prevents a dangling mEdit/medit alias from being published again.
+          sudo apt-get install -y "$PWD/$DEB"
+          command -v marktext
+          command -v mEdit
+          command -v medit
+          test -x "$(command -v marktext)"
+          test -x "$(command -v mEdit)"
+          test -x "$(command -v medit)"
+          test "$(readlink -f "$(command -v mEdit)")" = "$(readlink -f "$(command -v marktext)")"
+          test "$(readlink -f "$(command -v medit)")" = "$(readlink -f "$(command -v marktext)")"
 
           sha256sum "$APPIMAGE" "$DEB" > dist/SHA256SUMS-Ubuntu.txt
 
