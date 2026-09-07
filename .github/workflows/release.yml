@@ -142,8 +142,9 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Verify Ubuntu packages
+      - name: Verify Ubuntu packages and runtime metadata
         run: |
+          set -euo pipefail
           VERSION='${{ steps.meta.outputs.app_version }}'
           APPIMAGE="dist/mEdit-Ubuntu-x64-$VERSION.AppImage"
           DEB="dist/mEdit-Ubuntu-x64-$VERSION.deb"
@@ -151,6 +152,18 @@ jobs:
           test -f "$DEB"
           chmod +x "$APPIMAGE"
           dpkg-deb --info "$DEB" >/dev/null
+
+          DEPENDS="$(dpkg-deb -f "$DEB" Depends)"
+          echo "DEB Depends: $DEPENDS"
+          echo "$DEPENDS" | grep -Eq 'libasound2t64|libasound2'
+
+          CONTROL_DIR="$(mktemp -d)"
+          dpkg-deb -e "$DEB" "$CONTROL_DIR"
+          test -f "$CONTROL_DIR/postinst"
+          grep -q '/usr/bin/medit' "$CONTROL_DIR/postinst"
+          grep -q '/usr/bin/mEdit' "$CONTROL_DIR/postinst"
+          rm -rf "$CONTROL_DIR"
+
           sha256sum "$APPIMAGE" "$DEB" > dist/SHA256SUMS-Ubuntu.txt
 
       - name: Upload Ubuntu release files
