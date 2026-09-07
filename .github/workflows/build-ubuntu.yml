@@ -64,8 +64,9 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Verify Ubuntu packages
+      - name: Verify Ubuntu packages and installed commands
         run: |
+          set -euo pipefail
           VERSION='${{ steps.source-meta.outputs.app_version }}'
           APPIMAGE="dist/mEdit-Ubuntu-x64-$VERSION.AppImage"
           DEB="dist/mEdit-Ubuntu-x64-$VERSION.deb"
@@ -73,6 +74,19 @@ jobs:
           test -f "$DEB"
           chmod +x "$APPIMAGE"
           dpkg-deb --info "$DEB" >/dev/null
+
+          # Install the exact package we just built. This catches post-install
+          # alias bugs that a metadata-only check cannot detect.
+          sudo apt-get install -y "$PWD/$DEB"
+          command -v marktext
+          command -v mEdit
+          command -v medit
+          test -x "$(command -v marktext)"
+          test -x "$(command -v mEdit)"
+          test -x "$(command -v medit)"
+          test "$(readlink -f "$(command -v mEdit)")" = "$(readlink -f "$(command -v marktext)")"
+          test "$(readlink -f "$(command -v medit)")" = "$(readlink -f "$(command -v marktext)")"
+
           sha256sum "$APPIMAGE" "$DEB" > dist/SHA256SUMS-Ubuntu.txt
 
       - name: Upload Ubuntu files
