@@ -26,6 +26,37 @@ import './assets/styles/printService.css'
 window.marktext = {}
 bootstrapRenderer()
 
+// Keep the native desktop title visible on Linux/Windows. The editor updates
+// document.title when files change; normalize every update so an empty title
+// never leaves the window decoration blank and the mEDIT brand stays visible.
+const APP_WINDOW_TITLE = 'mEDIT'
+const syncWindowTitle = (): void => {
+  const currentTitle = document.title.trim()
+  let nextTitle = APP_WINDOW_TITLE
+
+  if (currentTitle && currentTitle !== APP_WINDOW_TITLE) {
+    const detail = currentTitle.replace(/^mEDIT\s+[—-]\s+/, '').trim()
+    if (detail) {
+      nextTitle = `${APP_WINDOW_TITLE} — ${detail}`
+    }
+  }
+
+  if (document.title !== nextTitle) {
+    document.title = nextTitle
+  }
+}
+
+syncWindowTitle()
+const titleElement = document.querySelector('title')
+if (titleElement) {
+  const titleObserver = new MutationObserver(syncWindowTitle)
+  titleObserver.observe(titleElement, {
+    childList: true,
+    subtree: true,
+    characterData: true
+  })
+}
+
 // -----------------------------------------------
 // Be careful when changing code before this line!
 
