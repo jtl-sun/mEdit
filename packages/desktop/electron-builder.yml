@@ -132,7 +132,7 @@ dmg:
       y: 240
       type: 'file'
 linux:
-  artifactName: 'mEdit-linux-${version}.${ext}'
+  artifactName: 'mEdit-Ubuntu-${arch}-${version}.${ext}'
   executableName: 'mEdit'
   description: 'A simple and elegant open-source markdown editor that focused on speed and usability.'
   maintainer: 'mEdit Contributors'
@@ -146,10 +146,7 @@ linux:
       Keywords: 'mEdit;markdown;editor;'
   target:
     - AppImage
-    - snap
     - deb
-    - rpm
-    - tar.gz
   fileAssociations:
     - ext: 'md'
       name: 'Markdown'

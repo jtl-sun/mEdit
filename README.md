@@ -1,10 +1,35 @@
 # mEdit
 
+## Download / 설치 파일
+
+일반 사용자는 소스 코드를 빌드할 필요가 없습니다. GitHub의 **Releases** 페이지에서 운영체제에 맞는 파일을 다운로드하세요.
+
+- **Windows 설치:** `mEdit-Windows-x64-0.21.3-setup.exe`
+- **Windows 무설치:** `mEdit-Windows-x64-0.21.3.zip`
+- **Ubuntu 설치:** `mEdit-Ubuntu-x64-0.21.3.deb`
+- **Ubuntu 무설치:** `mEdit-Ubuntu-x64-0.21.3.AppImage`
+
+다운로드: <https://github.com/jtl-sun/mEdit/releases/latest>
+
+Ubuntu AppImage는 처음 한 번 실행 권한을 부여한 뒤 실행합니다.
+
+```bash
+chmod +x mEdit-Ubuntu-x64-0.21.3.AppImage
+./mEdit-Ubuntu-x64-0.21.3.AppImage
+```
+
+Ubuntu DEB는 다음처럼 설치합니다.
+
+```bash
+sudo apt install ./mEdit-Ubuntu-x64-0.21.3.deb
+```
+
+
 **mEdit**는 Markdown 문서를 편리하게 작성하고 미리 볼 수 있는 데스크톱 편집기입니다.
 
 ## 현재 버전
 
-**mEdit 0.21.1**
+**mEdit 0.21.3**
 
 ## 주요 기능
 
@@ -61,3 +86,36 @@ pnpm build:win:x64
 
 MIT License를 따릅니다. 이 프로젝트는 오픈소스 편집기 코드를 기반으로 수정되었으므로
 원 저작권 고지와 MIT 라이선스는 삭제하지 않아야 합니다.
+
+## Ubuntu 24.04+
+
+mEdit 0.21.3 can be packaged for Ubuntu x64 as both an **AppImage** and a **DEB** package.
+
+Build locally on Ubuntu:
+
+```bash
+corepack enable
+corepack prepare pnpm@10.33.4 --activate
+pnpm install --frozen-lockfile
+pnpm build:linux:x64
+```
+
+Expected files in `dist/`:
+
+- `mEdit-Ubuntu-x64-0.21.3.AppImage` — portable, no installation required
+- `mEdit-Ubuntu-x64-0.21.3.deb` — installable Ubuntu package
+
+Install the DEB package:
+
+```bash
+sudo apt install ./mEdit-Ubuntu-x64-0.21.3.deb
+```
+
+Run the AppImage:
+
+```bash
+chmod +x mEdit-Ubuntu-x64-0.21.3.AppImage
+./mEdit-Ubuntu-x64-0.21.3.AppImage
+```
+
+The GitHub Actions workflow `.github/workflows/build-ubuntu.yml` builds and uploads both files automatically.

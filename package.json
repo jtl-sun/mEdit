@@ -1,6 +1,6 @@
 {
   "name": "medit-monorepo",
-  "version": "0.21.1",
+  "version": "0.21.3",
   "description": "mEdit monorepo root",
   "private": true,
   "packageManager": "pnpm@10.33.4",
@@ -25,6 +25,8 @@
     "build:mac:x64": "pnpm --filter marktext build:mac:x64",
     "build:mac:arm64": "pnpm --filter marktext build:mac:arm64",
     "build:linux": "pnpm --filter marktext build:linux",
+    "build:linux:x64": "pnpm --filter marktext build:linux:x64",
+    "build:linux:arm64": "pnpm --filter marktext build:linux:arm64",
     "perf:inspect": "pnpm --filter marktext perf:inspect",
     "perf:inspect-brk": "pnpm --filter marktext perf:inspect-brk",
     "test": "pnpm --filter marktext test",
@@ -35,12 +37,6 @@
     "check": "pnpm lint && pnpm typecheck",
     "gen-third-party": "tsx scripts/generateThirdPartyLicense.ts",
     "validate-licenses": "tsx scripts/validateLicenses.ts"
-  },
-  "pnpm": {
-    "overrides": {
-      "postcss": "8.5.15",
-      "esbuild@>=0.27.0 <0.28.1": "0.28.1"
-    }
   },
   "devDependencies": {
     "@babel/eslint-parser": "^7.29.7",

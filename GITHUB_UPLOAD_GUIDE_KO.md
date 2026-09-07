@@ -11,7 +11,7 @@
 
 ## 2. 소스 압축 풀기
 
-받은 **mEdit-0.21.1-GitHub-Source.zip**을 원하는 폴더에 압축 해제합니다.
+받은 **mEdit-0.21.2-GitHub-Source.zip**을 원하는 폴더에 압축 해제합니다.
 
 ## 3. PowerShell에서 업로드하기
 
@@ -21,7 +21,7 @@ YOUR-ID는 본인의 GitHub 아이디로 바꾸세요.
 ~~~powershell
 git init
 git add .
-git commit -m "Initial release: mEdit 0.21.1"
+git commit -m "Initial release: mEdit 0.21.2"
 git branch -M main
 git remote add origin https://github.com/YOUR-ID/mEdit.git
 git push -u origin main
@@ -39,7 +39,7 @@ git config --global user.email "YOUR-EMAIL@example.com"
 1. 업로드한 GitHub 저장소의 **Actions** 탭을 엽니다.
 2. **Build mEdit for Windows**를 선택합니다.
 3. **Run workflow**를 누릅니다.
-4. 완료된 작업을 열고 **Artifacts**의 **mEdit-0.21.1-Windows-x64**를 받습니다.
+4. 완료된 작업을 열고 **Artifacts**의 **mEdit-0.21.2-Windows-x64**를 받습니다.
 
 ## 주의 사항
 

@@ -1,7 +1,7 @@
 {
   "name": "marktext",
   "productName": "mEdit",
-  "version": "0.21.1",
+  "version": "0.21.3",
   "description": "mEdit Markdown editor",
   "main": "./out/main/index.js",
   "author": {
@@ -40,6 +40,8 @@
     "build:mac:x64": "tsx ../../scripts/minify-locales.ts && electron-rebuild && electron-vite build && electron-builder --mac --x64 --publish never",
     "build:mac:arm64": "tsx ../../scripts/minify-locales.ts && electron-rebuild && electron-vite build && electron-builder --mac --arm64 --publish never",
     "build:linux": "tsx ../../scripts/minify-locales.ts && electron-rebuild && electron-vite build && electron-builder --linux --publish never",
+    "build:linux:x64": "tsx ../../scripts/minify-locales.ts && electron-rebuild && electron-vite build && electron-builder --linux AppImage deb --x64 --publish never",
+    "build:linux:arm64": "tsx ../../scripts/minify-locales.ts && electron-rebuild && electron-vite build && electron-builder --linux AppImage deb --arm64 --publish never",
     "perf:inspect": "cross-env PERF_TESTING=true electron-vite preview -- --inspect=5858",
     "perf:inspect-brk": "cross-env PERF_TESTING=true electron-vite preview -- --inspect-brk=5858",
     "test": "vitest run",

@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-      - fix/basefloat-hide-race
   workflow_dispatch:
 
 permissions:
@@ -47,12 +46,17 @@ jobs:
           npm_config_user_agent: pnpm
 
       - name: Verify source
+        id: source-meta
         shell: pwsh
         run: |
           $package = Get-Content 'packages/desktop/package.json' -Raw | ConvertFrom-Json
-          if ($package.productName -ne 'mEdit' -or $package.version -ne '0.21.1') {
-            throw "Expected mEdit 0.21.1."
+          if ($package.productName -ne 'mEdit') {
+            throw "Expected productName mEdit."
           }
+          if ($package.version -notmatch '^\d+\.\d+\.\d+$') {
+            throw "Invalid mEdit package version: $($package.version)"
+          }
+          "app_version=$($package.version)" >> $env:GITHUB_OUTPUT
 
           $guide = Get-Content 'packages/desktop/src/renderer/src/components/markdownGuide/index.vue' -Raw
           foreach ($requiredText in @('Markdown 빠른 안내서', '제목 만들기', '체크박스 목록', '표 만들기', '수학식')) {
@@ -79,8 +83,10 @@ jobs:
       - name: Verify installer
         shell: pwsh
         run: |
-          if (-not (Test-Path 'dist/mEdit-Windows-x64-0.21.1-setup.exe')) {
-            throw 'The mEdit 0.21.1 installer was not created.'
+          $version = '${{ steps.source-meta.outputs.app_version }}'
+          $installer = "dist/mEdit-Windows-x64-$version-setup.exe"
+          if (-not (Test-Path $installer)) {
+            throw "The expected mEdit installer was not created: $installer"
           }
 
           Get-FileHash dist/*.exe, dist/*.zip -Algorithm SHA256 |
@@ -90,7 +96,7 @@ jobs:
       - name: Upload Windows files
         uses: actions/upload-artifact@v4
         with:
-          name: mEdit-0.21.1-Windows-x64
+          name: mEdit-${{ steps.source-meta.outputs.app_version }}-Windows-x64
           retention-days: 30
           if-no-files-found: error
           path: |

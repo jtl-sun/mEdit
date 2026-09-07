@@ -1,0 +1,205 @@
+name: Release mEdit installers
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-windows-x64:
+    if: github.event_name == 'workflow_dispatch' || startsWith(github.event.head_commit.message, 'Release mEdit ')
+    runs-on: windows-latest
+    timeout-minutes: 60
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24.14.1'
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Enable pnpm
+        shell: pwsh
+        run: |
+          corepack enable
+          corepack install --global pnpm@10.33.4
+
+      - name: Install dependencies
+        shell: pwsh
+        run: pnpm install --frozen-lockfile --ignore-scripts
+
+      - name: Prepare Electron native dependencies
+        shell: pwsh
+        run: pnpm tsx scripts/postinstall.ts
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          npm_config_user_agent: pnpm
+
+      - name: Read version
+        id: meta
+        shell: pwsh
+        run: |
+          $package = Get-Content 'packages/desktop/package.json' -Raw | ConvertFrom-Json
+          if ($package.productName -ne 'mEdit') { throw 'Expected productName mEdit.' }
+          if ($package.version -notmatch '^\d+\.\d+\.\d+$') { throw "Invalid version: $($package.version)" }
+          "app_version=$($package.version)" >> $env:GITHUB_OUTPUT
+
+      - name: Verify TypeScript
+        shell: pwsh
+        run: pnpm --filter marktext typecheck
+
+      - name: Build Windows installer
+        shell: pwsh
+        run: pnpm build:win:x64
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Verify Windows packages
+        shell: pwsh
+        run: |
+          $version = '${{ steps.meta.outputs.app_version }}'
+          $installer = "dist/mEdit-Windows-x64-$version-setup.exe"
+          $portable = "dist/mEdit-Windows-x64-$version.zip"
+          if (-not (Test-Path $installer)) { throw "Missing $installer" }
+          if (-not (Test-Path $portable)) { throw "Missing $portable" }
+          Get-FileHash $installer, $portable -Algorithm SHA256 |
+            ForEach-Object { "$($_.Hash)  $([IO.Path]::GetFileName($_.Path))" } |
+            Set-Content dist/SHA256SUMS-Windows.txt
+
+      - name: Upload Windows release files
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-windows
+          if-no-files-found: error
+          path: |
+            dist/mEdit-Windows-x64-${{ steps.meta.outputs.app_version }}-setup.exe
+            dist/mEdit-Windows-x64-${{ steps.meta.outputs.app_version }}.zip
+            dist/SHA256SUMS-Windows.txt
+
+  build-ubuntu-x64:
+    if: github.event_name == 'workflow_dispatch' || startsWith(github.event.head_commit.message, 'Release mEdit ')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24.14.1'
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Linux build tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential fakeroot libarchive-tools
+
+      - name: Enable pnpm
+        run: |
+          corepack enable
+          corepack install --global pnpm@10.33.4
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile --ignore-scripts
+
+      - name: Prepare Electron native dependencies
+        run: pnpm tsx scripts/postinstall.ts
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          npm_config_user_agent: pnpm
+
+      - name: Read version
+        id: meta
+        run: |
+          APP_VERSION=$(node -p "require('./packages/desktop/package.json').version")
+          PRODUCT_NAME=$(node -p "require('./packages/desktop/package.json').productName")
+          test "$PRODUCT_NAME" = "mEdit"
+          [[ "$APP_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]
+          echo "app_version=$APP_VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Verify TypeScript
+        run: pnpm --filter marktext typecheck
+
+      - name: Build Ubuntu AppImage and DEB
+        run: pnpm build:linux:x64
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Verify Ubuntu packages
+        run: |
+          VERSION='${{ steps.meta.outputs.app_version }}'
+          APPIMAGE="dist/mEdit-Ubuntu-x64-$VERSION.AppImage"
+          DEB="dist/mEdit-Ubuntu-x64-$VERSION.deb"
+          test -f "$APPIMAGE"
+          test -f "$DEB"
+          chmod +x "$APPIMAGE"
+          dpkg-deb --info "$DEB" >/dev/null
+          sha256sum "$APPIMAGE" "$DEB" > dist/SHA256SUMS-Ubuntu.txt
+
+      - name: Upload Ubuntu release files
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-ubuntu
+          if-no-files-found: error
+          path: |
+            dist/mEdit-Ubuntu-x64-${{ steps.meta.outputs.app_version }}.AppImage
+            dist/mEdit-Ubuntu-x64-${{ steps.meta.outputs.app_version }}.deb
+            dist/SHA256SUMS-Ubuntu.txt
+
+  publish-release:
+    if: github.event_name == 'workflow_dispatch' || startsWith(github.event.head_commit.message, 'Release mEdit ')
+    needs:
+      - build-windows-x64
+      - build-ubuntu-x64
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Read version
+        id: meta
+        run: |
+          APP_VERSION=$(node -p "require('./packages/desktop/package.json').version")
+          echo "app_version=$APP_VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Download built installers
+        uses: actions/download-artifact@v4
+        with:
+          pattern: release-*
+          path: release-files
+          merge-multiple: true
+
+      - name: Create GitHub Release and attach installers
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.meta.outputs.app_version }}
+          name: mEdit ${{ steps.meta.outputs.app_version }}
+          target_commitish: ${{ github.sha }}
+          generate_release_notes: true
+          make_latest: true
+          fail_on_unmatched_files: true
+          files: |
+            release-files/mEdit-Windows-x64-${{ steps.meta.outputs.app_version }}-setup.exe
+            release-files/mEdit-Windows-x64-${{ steps.meta.outputs.app_version }}.zip
+            release-files/mEdit-Ubuntu-x64-${{ steps.meta.outputs.app_version }}.AppImage
+            release-files/mEdit-Ubuntu-x64-${{ steps.meta.outputs.app_version }}.deb
+            release-files/SHA256SUMS-Windows.txt
+            release-files/SHA256SUMS-Ubuntu.txt

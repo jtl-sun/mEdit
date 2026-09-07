@@ -1,27 +1,35 @@
-; installer.nsh — include via electron-builder’s nsis.include
+; installer.nsh — include via electron-builder's nsis.include
+
+; Remove only the default association value if mEdit still owns it.
+; This avoids deleting another application's association during uninstall.
+!macro RemoveMEditAssociation EXT
+  ReadRegStr $0 HKCU "Software\Classes\${EXT}" ""
+  StrCmp $0 "mEdit.Document" 0 +2
+    DeleteRegValue HKCU "Software\Classes\${EXT}" ""
+!macroend
 
 ;======================================================================
 ; customInstall macro is invoked by electron-builder after files are in $INSTDIR
 !macro customInstall
   ; Ask the user if they want to register file associations
   MessageBox MB_YESNO|MB_ICONQUESTION \
-  "Do you want to associate Markdown files (.md, .markdown, .mmd, .mdown, .mdtext, .mdx) with MarkText?" /SD IDNO IDNO SkipAssoc
+  "Do you want to associate Markdown files (.md, .markdown, .mmd, .mdown, .mdtxt, .mdtext, .mdx) with mEdit?" /SD IDNO IDNO SkipAssoc
 
-  ;— User clicked YES, perform the registry writes —
-  WriteRegStr HKCU "Software\Classes\.md"       "" "MarkText.Document"
-  WriteRegStr HKCU "Software\Classes\.markdown" "" "MarkText.Document"
-  WriteRegStr HKCU "Software\Classes\.mmd"      "" "MarkText.Document"
-  WriteRegStr HKCU "Software\Classes\.mdown"    "" "MarkText.Document"
-  WriteRegStr HKCU "Software\Classes\.mdtxt"    "" "MarkText.Document"
-  WriteRegStr HKCU "Software\Classes\.mdtext"   "" "MarkText.Document"
-  WriteRegStr HKCU "Software\Classes\.mdx"      "" "MarkText.Document"
+  ; User clicked YES, perform the registry writes.
+  WriteRegStr HKCU "Software\Classes\.md"       "" "mEdit.Document"
+  WriteRegStr HKCU "Software\Classes\.markdown" "" "mEdit.Document"
+  WriteRegStr HKCU "Software\Classes\.mmd"      "" "mEdit.Document"
+  WriteRegStr HKCU "Software\Classes\.mdown"    "" "mEdit.Document"
+  WriteRegStr HKCU "Software\Classes\.mdtxt"    "" "mEdit.Document"
+  WriteRegStr HKCU "Software\Classes\.mdtext"   "" "mEdit.Document"
+  WriteRegStr HKCU "Software\Classes\.mdx"      "" "mEdit.Document"
 
-  WriteRegStr HKCU "Software\Classes\MarkText.Document" \
-    "" "MarkText Markdown Document"
-  WriteRegExpandStr HKCU "Software\Classes\MarkText.Document\DefaultIcon" \
+  WriteRegStr HKCU "Software\Classes\mEdit.Document" \
+    "" "mEdit Markdown Document"
+  WriteRegExpandStr HKCU "Software\Classes\mEdit.Document\DefaultIcon" \
     "" "$INSTDIR\resources\icons\md.ico,0"
-  WriteRegExpandStr HKCU "Software\Classes\MarkText.Document\shell\open\command" \
-    "" '"$INSTDIR\marktext.exe" "%1"'
+  WriteRegExpandStr HKCU "Software\Classes\mEdit.Document\shell\open\command" \
+    "" '"$INSTDIR\mEdit.exe" "%1"'
 
 SkipAssoc:
 !macroend
@@ -29,26 +37,20 @@ SkipAssoc:
 ;======================================================================
 ; customUnInstall macro cleans up on uninstall
 !macro customUnInstall
-  ; Delete the open command subtree
-  DeleteRegKey HKCU "Software\Classes\MarkText.Document\shell\open\command"
-  DeleteRegKey HKCU "Software\Classes\MarkText.Document\shell\open"
-  DeleteRegKey HKCU "Software\Classes\MarkText.Document\shell"
+  ; Remove the mEdit-owned ProgID.
+  DeleteRegKey HKCU "Software\Classes\mEdit.Document"
 
-  ; Delete the DefaultIcon and ProgID
-  DeleteRegKey HKCU "Software\Classes\MarkText.Document\DefaultIcon"
-  DeleteRegKey HKCU "Software\Classes\MarkText.Document"
+  ; Remove extension defaults only while they still point to mEdit.
+  !insertmacro RemoveMEditAssociation ".md"
+  !insertmacro RemoveMEditAssociation ".markdown"
+  !insertmacro RemoveMEditAssociation ".mmd"
+  !insertmacro RemoveMEditAssociation ".mdown"
+  !insertmacro RemoveMEditAssociation ".mdtxt"
+  !insertmacro RemoveMEditAssociation ".mdtext"
+  !insertmacro RemoveMEditAssociation ".mdx"
 
-  ; Delete each extension mapping
-  DeleteRegKey HKCU "Software\Classes\.md"
-  DeleteRegKey HKCU "Software\Classes\.markdown"
-  DeleteRegKey HKCU "Software\Classes\.mmd"
-  DeleteRegKey HKCU "Software\Classes\.mdown"
-  DeleteRegKey HKCU "Software\Classes\.mdtxt"
-  DeleteRegKey HKCU "Software\Classes\.mdtext"
-  DeleteRegKey HKCU "Software\Classes\.mdx"
-
-  MessageBox MB_YESNO "Do you want to delete user settings?" /SD IDNO IDNO SkipRemoval
+  MessageBox MB_YESNO "Do you want to delete mEdit user settings?" /SD IDNO IDNO SkipRemoval
     SetShellVarContext current
-    RMDir /r "$APPDATA\marktext"
+    RMDir /r "$APPDATA\mEdit"
   SkipRemoval:
 !macroend
