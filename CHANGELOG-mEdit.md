@@ -1,6 +1,13 @@
 # mEdit 변경 기록
 
 
+## 0.21.4
+
+- Ubuntu 24.04/26.04에서 Electron 실행에 필요한 `libasound.so.2`가 누락되던 문제 수정
+- DEB 설치 시 `libasound2t64`(또는 구버전 배포판의 `libasound2`)를 자동 의존성으로 설치하도록 패키징 수정
+- Ubuntu DEB 설치 후 터미널에서 `mEdit`뿐 아니라 `medit` 소문자 명령으로도 실행 가능하도록 안전한 별칭 추가
+- 제거 시 mEdit가 만든 `medit` 심볼릭 링크만 삭제하여 다른 프로그램의 동일 이름 파일을 보호
+
 ## 0.21.3
 
 - Added an automated GitHub Release workflow that publishes Windows Setup/portable ZIP and Ubuntu AppImage/DEB installers for end users.
