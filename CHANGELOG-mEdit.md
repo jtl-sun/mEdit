@@ -1,5 +1,12 @@
 # mEdit 변경 기록
 
+## 0.21.6
+
+- Ubuntu DEB 내부의 기존 `marktext` 실행 파일을 감지하여 실제 동작하는 `mEdit` / `medit` 명령을 생성하도록 수정
+- 0.21.5에서 `/usr/bin/mEdit`가 존재한다고 잘못 가정해 별칭이 끊어졌던 패키징 오류 수정
+- 제거 시 mEdit가 만든 심볼릭 링크만 안전하게 삭제하도록 정리
+- Ubuntu CI가 생성된 DEB를 실제로 설치한 뒤 `marktext`, `mEdit`, `medit` 세 명령이 같은 실행 파일로 연결되는지 검증하도록 강화
+
 ## 0.21.5
 
 - Ubuntu/Windows의 기본 창 제목줄에 프로그램 이름 **`mEDIT`**가 항상 보이도록 수정
