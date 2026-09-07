@@ -2,6 +2,11 @@ appId: com.jtlsun.medit
 productName: mEdit
 # mEdit does not use the upstream MarkText release/update channel.
 publish: null
+# Package metadata used by electron-builder/fpm. Linux DEB packaging requires
+# a project homepage, and desktopName keeps the Linux WM_CLASS/app id as mEdit.
+extraMetadata:
+  homepage: 'https://github.com/jtl-sun/mEdit'
+  desktopName: 'mEdit'
 directories:
   buildResources: build
   output: ../../dist
@@ -132,13 +137,16 @@ dmg:
       y: 240
       type: 'file'
 linux:
-  artifactName: 'mEdit-Ubuntu-${arch}-${version}.${ext}'
+  # The current Ubuntu CI/release job builds x64 only. Keep the public asset
+  # names consistent with the Windows naming so users can recognize them easily.
+  artifactName: 'mEdit-Ubuntu-x64-${version}.${ext}'
   executableName: 'mEdit'
   description: 'A simple and elegant open-source markdown editor focused on speed and usability.'
   # Let electron-builder derive the Debian maintainer from package.json author,
   # which includes the required contact email. A name-only maintainer is invalid
   # for Debian package metadata and can make the DEB target fail.
   category: 'Office'
+  syncDesktopName: true
   mimeTypes:
     - 'text/markdown'
   icon: 'static/icon.png'
