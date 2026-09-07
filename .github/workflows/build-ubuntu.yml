@@ -31,7 +31,7 @@ jobs:
       - name: Install Linux build tools
         run: |
           sudo apt-get update
-          sudo apt-get install -y build-essential fakeroot libarchive-tools
+          sudo apt-get install -y build-essential fakeroot libarchive-tools libx11-dev libxkbfile-dev
 
       - name: Enable pnpm
         run: |
