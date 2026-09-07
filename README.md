@@ -4,32 +4,39 @@
 
 일반 사용자는 소스 코드를 빌드할 필요가 없습니다. GitHub의 **Releases** 페이지에서 운영체제에 맞는 파일을 다운로드하세요.
 
-- **Windows 설치:** `mEdit-Windows-x64-0.21.3-setup.exe`
-- **Windows 무설치:** `mEdit-Windows-x64-0.21.3.zip`
-- **Ubuntu 설치:** `mEdit-Ubuntu-x64-0.21.3.deb`
-- **Ubuntu 무설치:** `mEdit-Ubuntu-x64-0.21.3.AppImage`
+- **Windows 설치:** `mEdit-Windows-x64-0.21.4-setup.exe`
+- **Windows 무설치:** `mEdit-Windows-x64-0.21.4.zip`
+- **Ubuntu 설치:** `mEdit-Ubuntu-x64-0.21.4.deb`
+- **Ubuntu 무설치:** `mEdit-Ubuntu-x64-0.21.4.AppImage`
 
 다운로드: <https://github.com/jtl-sun/mEdit/releases/latest>
 
 Ubuntu AppImage는 처음 한 번 실행 권한을 부여한 뒤 실행합니다.
 
 ```bash
-chmod +x mEdit-Ubuntu-x64-0.21.3.AppImage
-./mEdit-Ubuntu-x64-0.21.3.AppImage
+chmod +x mEdit-Ubuntu-x64-0.21.4.AppImage
+./mEdit-Ubuntu-x64-0.21.4.AppImage
 ```
 
-Ubuntu DEB는 다음처럼 설치합니다.
+Ubuntu DEB는 다음처럼 설치합니다. 필요한 런타임 라이브러리(ALSA 포함)는 APT가 함께 설치합니다.
 
 ```bash
-sudo apt install ./mEdit-Ubuntu-x64-0.21.3.deb
+sudo apt install ./mEdit-Ubuntu-x64-0.21.4.deb
 ```
 
+설치 후 앱 메뉴에서 **mEdit**를 실행하거나 터미널에서 아래 둘 중 하나를 사용할 수 있습니다.
+
+```bash
+mEdit
+# 또는
+medit
+```
 
 **mEdit**는 Markdown 문서를 편리하게 작성하고 미리 볼 수 있는 데스크톱 편집기입니다.
 
 ## 현재 버전
 
-**mEdit 0.21.3**
+**mEdit 0.21.4**
 
 ## 주요 기능
 
@@ -89,7 +96,7 @@ MIT License를 따릅니다. 이 프로젝트는 오픈소스 편집기 코드�
 
 ## Ubuntu 24.04+
 
-mEdit 0.21.3 can be packaged for Ubuntu x64 as both an **AppImage** and a **DEB** package.
+mEdit 0.21.4 can be packaged for Ubuntu x64 as both an **AppImage** and a **DEB** package.
 
 Build locally on Ubuntu:
 
@@ -102,20 +109,28 @@ pnpm build:linux:x64
 
 Expected files in `dist/`:
 
-- `mEdit-Ubuntu-x64-0.21.3.AppImage` — portable, no installation required
-- `mEdit-Ubuntu-x64-0.21.3.deb` — installable Ubuntu package
+- `mEdit-Ubuntu-x64-0.21.4.AppImage` — portable, no installation required
+- `mEdit-Ubuntu-x64-0.21.4.deb` — installable Ubuntu package
 
 Install the DEB package:
 
 ```bash
-sudo apt install ./mEdit-Ubuntu-x64-0.21.3.deb
+sudo apt install ./mEdit-Ubuntu-x64-0.21.4.deb
+```
+
+Run the installed application:
+
+```bash
+mEdit
+# lowercase alias is also installed by the DEB package
+medit
 ```
 
 Run the AppImage:
 
 ```bash
-chmod +x mEdit-Ubuntu-x64-0.21.3.AppImage
-./mEdit-Ubuntu-x64-0.21.3.AppImage
+chmod +x mEdit-Ubuntu-x64-0.21.4.AppImage
+./mEdit-Ubuntu-x64-0.21.4.AppImage
 ```
 
 The GitHub Actions workflow `.github/workflows/build-ubuntu.yml` builds and uploads both files automatically.
