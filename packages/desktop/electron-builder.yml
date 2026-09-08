@@ -182,9 +182,21 @@ linux:
       description: 'Markdown document'
 
 deb:
+  # Do not expose the upstream internal npm name (`marktext`) as the Debian
+  # package name. `medit` cannot be used either because Ubuntu already has an
+  # unrelated package with that name.
+  packageName: 'medit-markdown'
+  # Allow a clean upgrade from mEdit <= 0.21.7, whose DEB was unfortunately
+  # published with Package: marktext. Replaces permits file takeover and
+  # Conflicts makes APT remove the obsolete package during the upgrade.
+  fpm:
+    - '--conflicts=marktext'
+    - '--replaces=marktext'
   # electron-builder's default dependency set does not include ALSA. Electron
   # still links against libasound.so.2, so Ubuntu 24.04/26.04 needs
   # libasound2t64. Keep libasound2 as an alternative for older Ubuntu/Debian.
+  # The Markdown quick guide contains Korean text, so install Noto CJK to make
+  # Hangul rendering reliable even on an English-only Ubuntu installation.
   depends:
     - 'libgtk-3-0'
     - 'libnotify4'
@@ -196,6 +208,7 @@ deb:
     - 'libuuid1'
     - 'libsecret-1-0'
     - 'libasound2t64 | libasound2'
+    - 'fonts-noto-cjk'
   # IMPORTANT: do not override afterInstall/afterRemove here. electron-builder
   # supplies its own scripts that create/remove the /usr/bin/mEdit launcher,
   # configure chrome-sandbox permissions, refresh MIME/desktop databases, and
