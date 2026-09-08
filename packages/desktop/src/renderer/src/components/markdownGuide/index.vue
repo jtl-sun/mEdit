@@ -163,6 +163,22 @@ onBeforeUnmount(() => {
 </script>
 
 <style>
+/*
+ * The guide contains Korean text even when mEdit itself is using an English UI.
+ * On Linux, explicitly prefer CJK-capable fonts instead of inheriting a
+ * Latin-only UI/code font. The DEB package also installs Noto CJK so this
+ * fallback is always available after a normal Ubuntu installation.
+ */
+.markdown-guide-dialog,
+.markdown-guide-dialog .el-dialog__header,
+.markdown-guide-dialog .el-dialog__body,
+.markdown-guide-dialog .el-dialog__footer,
+.markdown-guide-dialog button {
+  font-family:
+    'Noto Sans CJK KR', 'Noto Sans KR', 'NanumGothic', 'Malgun Gothic',
+    'Apple SD Gothic Neo', 'Segoe UI', sans-serif;
+}
+
 .markdown-guide-dialog .el-dialog__body {
   max-height: 68vh;
   padding-top: 8px;
@@ -234,7 +250,9 @@ onBeforeUnmount(() => {
 }
 
 .guide-item pre code {
-  font-family: var(--codeFontFamily, Consolas, 'Courier New', monospace);
+  font-family:
+    'Noto Sans Mono CJK KR', 'Noto Sans CJK KR', 'Noto Sans KR',
+    'Nanum Gothic Coding', D2Coding, 'Cascadia Mono', Consolas, monospace;
   line-height: 1.6;
 }
 

@@ -1,5 +1,13 @@
 # mEdit 변경 기록
 
+## 0.21.8
+
+- Ubuntu의 **Markdown 빠른 안내서**에서 한글이 네모(□)로 표시되던 문제를 수정하고, 한글을 지원하는 Noto CJK/시스템 글꼴 fallback을 명시
+- Ubuntu DEB 설치 시 `fonts-noto-cjk`를 자동 설치하여 영문 전용 Ubuntu 환경에서도 한글 안내서가 정상 표시되도록 수정
+- DEB의 사용자 표시 패키지 이름을 잘못 남아 있던 `marktext`에서 `medit-markdown`으로 변경
+- 기존 0.21.7 이하의 `marktext` 패키지를 새 `medit-markdown` 패키지가 안전하게 교체하도록 `Conflicts`/`Replaces` 메타데이터 추가
+- Ubuntu CI와 Release CI에서 DEB 패키지 이름, 기존 패키지 교체, Noto CJK 설치, 한글 글꼴 검색, `mEdit` 실행 링크를 실제 설치 후 검증하도록 강화
+
 ## 0.21.7
 
 - Ubuntu DEB의 사용자 정의 `afterInstall`/`afterRemove`가 electron-builder 기본 설치 스크립트를 덮어써 `/usr/bin/mEdit`가 생성되지 않던 근본 원인 수정

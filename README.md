@@ -4,25 +4,27 @@
 
 일반 사용자는 소스 코드를 빌드할 필요가 없습니다. GitHub의 **Releases** 페이지에서 운영체제에 맞는 파일을 다운로드하세요.
 
-- **Windows 설치:** `mEdit-Windows-x64-0.21.7-setup.exe`
-- **Windows 무설치:** `mEdit-Windows-x64-0.21.7.zip`
-- **Ubuntu 설치:** `mEdit-Ubuntu-x64-0.21.7.deb`
-- **Ubuntu 무설치:** `mEdit-Ubuntu-x64-0.21.7.AppImage`
+- **Windows 설치:** `mEdit-Windows-x64-0.21.8-setup.exe`
+- **Windows 무설치:** `mEdit-Windows-x64-0.21.8.zip`
+- **Ubuntu 설치:** `mEdit-Ubuntu-x64-0.21.8.deb`
+- **Ubuntu 무설치:** `mEdit-Ubuntu-x64-0.21.8.AppImage`
 
 다운로드: <https://github.com/jtl-sun/mEdit/releases/latest>
 
 Ubuntu AppImage는 처음 한 번 실행 권한을 부여한 뒤 실행합니다.
 
 ```bash
-chmod +x mEdit-Ubuntu-x64-0.21.7.AppImage
-./mEdit-Ubuntu-x64-0.21.7.AppImage
+chmod +x mEdit-Ubuntu-x64-0.21.8.AppImage
+./mEdit-Ubuntu-x64-0.21.8.AppImage
 ```
 
-Ubuntu DEB는 다음처럼 설치합니다. 필요한 런타임 라이브러리(ALSA 포함)는 APT가 함께 설치합니다.
+Ubuntu DEB는 다음처럼 설치합니다. 필요한 런타임 라이브러리와 한글 표시용 Noto CJK 글꼴은 APT가 함께 설치합니다.
 
 ```bash
-sudo apt install ./mEdit-Ubuntu-x64-0.21.7.deb
+sudo apt install ./mEdit-Ubuntu-x64-0.21.8.deb
 ```
+
+0.21.7 이하 Ubuntu DEB가 `marktext`라는 잘못된 패키지 이름으로 설치되어 있어도 0.21.8 설치 시 새 `medit-markdown` 패키지로 자동 교체됩니다.
 
 설치 후 앱 메뉴에서 **mEdit**를 실행하거나 터미널에서 다음 명령을 사용합니다.
 
@@ -36,7 +38,7 @@ mEdit
 
 ## 현재 버전
 
-**mEdit 0.21.7**
+**mEdit 0.21.8**
 
 ## 주요 기능
 
@@ -44,6 +46,7 @@ mEdit
 - 익숙한 드롭다운 방식의 상단 메뉴
 - 문서 편집 영역을 항상 왼쪽에 배치
 - Help → **Markdown 빠른 안내서**
+- Ubuntu에서도 한글이 정상 표시되는 Markdown 안내서
 - 제목, 강조, 목록, 체크박스, 링크, 이미지, 인용문, 코드, 표, 각주, 수학식 예제
 - 밝은 테마와 어두운 테마
 - 탭, 파일 탐색기, 검색, 내보내기 등 Markdown 편집 기능
@@ -97,7 +100,7 @@ MIT License를 따릅니다. 이 프로젝트는 오픈소스 편집기 코드�
 
 ## Ubuntu 24.04+
 
-mEdit 0.21.7 can be packaged for Ubuntu x64 as both an **AppImage** and a **DEB** package.
+mEdit 0.21.8 can be packaged for Ubuntu x64 as both an **AppImage** and a **DEB** package.
 
 Build locally on Ubuntu:
 
@@ -110,13 +113,13 @@ pnpm build:linux:x64
 
 Expected files in `dist/`:
 
-- `mEdit-Ubuntu-x64-0.21.7.AppImage` — portable, no installation required
-- `mEdit-Ubuntu-x64-0.21.7.deb` — installable Ubuntu package
+- `mEdit-Ubuntu-x64-0.21.8.AppImage` — portable, no installation required
+- `mEdit-Ubuntu-x64-0.21.8.deb` — installable Ubuntu package
 
 Install the DEB package:
 
 ```bash
-sudo apt install ./mEdit-Ubuntu-x64-0.21.7.deb
+sudo apt install ./mEdit-Ubuntu-x64-0.21.8.deb
 ```
 
 Run the installed application:
@@ -128,8 +131,10 @@ mEdit
 Run the AppImage:
 
 ```bash
-chmod +x mEdit-Ubuntu-x64-0.21.7.AppImage
-./mEdit-Ubuntu-x64-0.21.7.AppImage
+chmod +x mEdit-Ubuntu-x64-0.21.8.AppImage
+./mEdit-Ubuntu-x64-0.21.8.AppImage
 ```
+
+For DEB installations the package name is `medit-markdown`, not `marktext`. The DEB also depends on `fonts-noto-cjk` so Korean help text is rendered correctly on a fresh English Ubuntu installation.
 
 The GitHub Actions workflow `.github/workflows/build-ubuntu.yml` builds and uploads both files automatically.

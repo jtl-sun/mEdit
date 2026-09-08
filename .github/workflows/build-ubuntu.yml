@@ -54,6 +54,8 @@ jobs:
           PRODUCT_NAME=$(node -p "require('./packages/desktop/package.json').productName")
           test "$PRODUCT_NAME" = "mEdit"
           [[ "$APP_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]
+          grep -Fq 'Noto Sans CJK KR' packages/desktop/src/renderer/src/components/markdownGuide/index.vue
+          grep -Fq 'Markdown 빠른 안내서' packages/desktop/src/renderer/src/components/markdownGuide/index.vue
           echo "app_version=$APP_VERSION" >> "$GITHUB_OUTPUT"
 
       - name: Verify TypeScript
@@ -75,9 +77,22 @@ jobs:
           chmod +x "$APPIMAGE"
           dpkg-deb --info "$DEB" >/dev/null
 
+          # User-facing Debian identity must be mEdit-specific. The old 0.21.7
+          # package accidentally exposed the upstream internal name `marktext`.
+          DEB_PACKAGE="$(dpkg-deb -f "$DEB" Package)"
+          test "$DEB_PACKAGE" = 'medit-markdown'
+          CONFLICTS="$(dpkg-deb -f "$DEB" Conflicts)"
+          REPLACES="$(dpkg-deb -f "$DEB" Replaces)"
+          echo "DEB Package: $DEB_PACKAGE"
+          echo "DEB Conflicts: $CONFLICTS"
+          echo "DEB Replaces: $REPLACES"
+          echo "$CONFLICTS" | grep -Eq '(^|, ?| )marktext($|,| )'
+          echo "$REPLACES" | grep -Eq '(^|, ?| )marktext($|,| )'
+
           DEPENDS="$(dpkg-deb -f "$DEB" Depends)"
           echo "DEB Depends: $DEPENDS"
           echo "$DEPENDS" | grep -Eq 'libasound2t64|libasound2'
+          echo "$DEPENDS" | grep -Fq 'fonts-noto-cjk'
 
           # Verify that electron-builder generated its standard maintainer
           # script. A custom afterInstall previously replaced this script and
@@ -92,8 +107,38 @@ jobs:
             exit 1
           fi
 
-          # Install the exact DEB and verify the actual command path.
+          # Simulate an upgrade from <= 0.21.7. Those releases were installed
+          # as Package: marktext. The new package must remove that obsolete
+          # package automatically rather than colliding with its files.
+          OLD_ROOT="$(mktemp -d)"
+          mkdir -p "$OLD_ROOT/DEBIAN"
+          cat > "$OLD_ROOT/DEBIAN/control" <<'EOF'
+          Package: marktext
+          Version: 0.21.7
+          Section: editors
+          Priority: optional
+          Architecture: all
+          Maintainer: mEdit CI <noreply@example.com>
+          Description: Synthetic legacy mEdit package used only for upgrade testing
+          EOF
+          dpkg-deb --build "$OLD_ROOT" /tmp/marktext-legacy-test.deb >/dev/null
+          sudo dpkg -i /tmp/marktext-legacy-test.deb
+          test "$(dpkg-query -W -f='${Status}' marktext)" = 'install ok installed'
+
+          # Install the exact new DEB and verify package migration, Korean font
+          # availability, and the actual command path.
           sudo apt-get install -y "$PWD/$DEB"
+          test "$(dpkg-query -W -f='${Status}' "$DEB_PACKAGE")" = 'install ok installed'
+          if dpkg-query -W -f='${Status}' marktext 2>/dev/null | grep -Fq 'install ok installed'; then
+            echo 'Legacy marktext package was not removed during upgrade.' >&2
+            exit 1
+          fi
+          test "$(dpkg-query -W -f='${Status}' fonts-noto-cjk)" = 'install ok installed'
+          KOREAN_FONT="$(fc-match -f '%{family}\n' :lang=ko | head -n 1)"
+          echo "Korean font match: $KOREAN_FONT"
+          test -n "$KOREAN_FONT"
+          fc-list :lang=ko family | grep -Eqi 'Noto.*(CJK|KR)'
+
           MEDIT_COMMAND="$(command -v mEdit)"
           test -x "$MEDIT_COMMAND"
           REAL_MEDIT="$(readlink -f "$MEDIT_COMMAND")"
@@ -105,7 +150,6 @@ jobs:
 
           # `medit` is intentionally NOT created: Ubuntu already provides an
           # unrelated package/command with that lowercase name.
-          DEB_PACKAGE="$(dpkg-deb -f "$DEB" Package)"
           if dpkg-query -S /usr/bin/medit 2>/dev/null | grep -Fq "$DEB_PACKAGE:"; then
             echo 'mEdit package must not own /usr/bin/medit.' >&2
             exit 1
