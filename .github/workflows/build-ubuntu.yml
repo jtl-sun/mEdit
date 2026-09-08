@@ -64,7 +64,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Verify Ubuntu packages and installed commands
+      - name: Verify Ubuntu package and launcher
         run: |
           set -euo pipefail
           VERSION='${{ steps.source-meta.outputs.app_version }}'
@@ -75,17 +75,41 @@ jobs:
           chmod +x "$APPIMAGE"
           dpkg-deb --info "$DEB" >/dev/null
 
-          # Install the exact package we just built. This catches post-install
-          # alias bugs that a metadata-only check cannot detect.
+          DEPENDS="$(dpkg-deb -f "$DEB" Depends)"
+          echo "DEB Depends: $DEPENDS"
+          echo "$DEPENDS" | grep -Eq 'libasound2t64|libasound2'
+
+          # Verify that electron-builder generated its standard maintainer
+          # script. A custom afterInstall previously replaced this script and
+          # prevented /usr/bin/mEdit from ever being created.
+          CONTROL_DIR="$(mktemp -d)"
+          dpkg-deb -e "$DEB" "$CONTROL_DIR"
+          test -f "$CONTROL_DIR/postinst"
+          grep -Fq '/usr/bin/mEdit' "$CONTROL_DIR/postinst"
+          grep -Fq '/opt/mEdit/mEdit' "$CONTROL_DIR/postinst"
+          if grep -Fq 'installed executable was not found' "$CONTROL_DIR/postinst"; then
+            echo 'Unexpected legacy mEdit afterInstall script in DEB.' >&2
+            exit 1
+          fi
+
+          # Install the exact DEB and verify the actual command path.
           sudo apt-get install -y "$PWD/$DEB"
-          command -v marktext
-          command -v mEdit
-          command -v medit
-          test -x "$(command -v marktext)"
-          test -x "$(command -v mEdit)"
-          test -x "$(command -v medit)"
-          test "$(readlink -f "$(command -v mEdit)")" = "$(readlink -f "$(command -v marktext)")"
-          test "$(readlink -f "$(command -v medit)")" = "$(readlink -f "$(command -v marktext)")"
+          MEDIT_COMMAND="$(command -v mEdit)"
+          test -x "$MEDIT_COMMAND"
+          REAL_MEDIT="$(readlink -f "$MEDIT_COMMAND")"
+          test -x "$REAL_MEDIT"
+          case "$REAL_MEDIT" in
+            /opt/*/mEdit) ;;
+            *) echo "Unexpected mEdit target: $REAL_MEDIT" >&2; exit 1 ;;
+          esac
+
+          # `medit` is intentionally NOT created: Ubuntu already provides an
+          # unrelated package/command with that lowercase name.
+          DEB_PACKAGE="$(dpkg-deb -f "$DEB" Package)"
+          if dpkg-query -S /usr/bin/medit 2>/dev/null | grep -Fq "$DEB_PACKAGE:"; then
+            echo 'mEdit package must not own /usr/bin/medit.' >&2
+            exit 1
+          fi
 
           sha256sum "$APPIMAGE" "$DEB" > dist/SHA256SUMS-Ubuntu.txt
 
