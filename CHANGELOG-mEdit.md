@@ -1,5 +1,12 @@
 # mEdit 변경 기록
 
+## 0.21.7
+
+- Ubuntu DEB의 사용자 정의 `afterInstall`/`afterRemove`가 electron-builder 기본 설치 스크립트를 덮어써 `/usr/bin/mEdit`가 생성되지 않던 근본 원인 수정
+- electron-builder 기본 설치/제거 스크립트를 다시 사용하여 `mEdit` 실행 링크, chrome-sandbox 권한, MIME/데스크톱 데이터베이스, AppArmor 처리를 정상화
+- Ubuntu에 이미 별도 프로그램 `medit`가 존재하므로 충돌 가능성이 있는 소문자 `medit` 별칭을 제거하고 터미널 실행 명령을 `mEdit`로 통일
+- Ubuntu CI와 Release CI가 DEB의 실제 `postinst` 내용을 검사하고, 생성된 DEB를 설치한 뒤 `/usr/bin/mEdit`가 `/opt/.../mEdit` 실행 파일로 연결되는지 검증하도록 강화
+
 ## 0.21.6
 
 - Ubuntu DEB 내부의 기존 `marktext` 실행 파일을 감지하여 실제 동작하는 `mEdit` / `medit` 명령을 생성하도록 수정
