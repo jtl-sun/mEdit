@@ -23,7 +23,7 @@
     {
       "name": "Tkaixiang",
       "email": "tkaixiang@gmail.com",
-      "url": "https://github.com/tkaixiang"
+      "url": "https://github.com/Tkaixiang"
     }
   ],
   "scripts": {
@@ -112,35 +112,35 @@
     "native-keymap": "^3.3.9"
   },
   "devDependencies": {
-    "@electron/rebuild": "^4.0.2",
-    "@playwright/test": "^1.55.1",
-    "@types/codemirror": "^5.60.16",
+    "@electron/rebuild": "^4.0.4",
+    "@playwright/test": "^1.61.0",
+    "@types/codemirror": "^5.60.17",
     "@types/deep-equal": "^1.0.4",
-    "@types/dragula": "^3.7.4",
+    "@types/dragula": "^3.7.5",
     "@types/element-resize-detector": "^1.1.6",
     "@types/fs-extra": "^11.0.4",
     "@types/fuzzaldrin": "^1.0.9",
-    "@types/lodash": "^4.17.20",
+    "@types/lodash": "^4.17.24",
     "@types/ms": "^2.1.0",
-    "@types/node": "^22.18.6",
-    "@types/turndown": "^5.0.5",
+    "@types/node": "^22.20.0",
+    "@types/turndown": "^5.0.6",
     "@types/webfontloader": "^1.6.38",
     "@types/write-file-atomic": "^4.0.3",
-    "@vitejs/plugin-vue": "^6.0.1",
-    "@vitest/coverage-v8": "^3.2.4",
-    "cross-env": "^10.0.0",
-    "electron": "~38.2.1",
-    "electron-builder": "^26.0.12",
-    "electron-vite": "^4.0.0",
-    "jsdom": "^27.0.0",
-    "patch-package": "^8.0.0",
-    "postcss-preset-env": "^10.3.1",
-    "tsx": "^4.20.6",
-    "typescript": "^5.9.2",
-    "vite": "^7.1.7",
-    "vite-svg-loader": "^5.1.0",
-    "vitest": "^3.2.4",
-    "vue": "^3.5.21",
-    "vue-tsc": "^3.0.7"
+    "@vitejs/plugin-vue": "^6.0.7",
+    "@vitest/coverage-v8": "^4.1.9",
+    "cross-env": "^10.1.0",
+    "electron": "~42.1.0",
+    "electron-builder": "^26.15.3",
+    "electron-vite": "^5.0.0",
+    "jsdom": "^29.1.1",
+    "patch-package": "^8.0.1",
+    "postcss-preset-env": "^11.3.1",
+    "tsx": "^4.22.4",
+    "typescript": "^6.0.3",
+    "vite": "^7.3.5",
+    "vite-svg-loader": "^5.1.1",
+    "vitest": "^4.1.9",
+    "vue": "^3.5.38",
+    "vue-tsc": "^3.3.5"
   }
 }
