@@ -1,6 +1,6 @@
 {
   "name": "medit-monorepo",
-  "version": "0.21.8",
+  "version": "0.21.9",
   "description": "mEdit monorepo root",
   "private": true,
   "packageManager": "pnpm@10.33.4",

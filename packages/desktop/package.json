@@ -1,7 +1,7 @@
 {
   "name": "marktext",
   "productName": "mEdit",
-  "version": "0.21.8",
+  "version": "0.21.9",
   "description": "mEdit Markdown editor",
   "main": "./out/main/index.js",
   "author": {
