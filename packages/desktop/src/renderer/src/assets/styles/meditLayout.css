@@ -1,19 +1,28 @@
 /* mEdit writing layout
  *
- * Muya/MarkText historically centers a fixed-width writing column for long-form
- * reading. mEdit intentionally behaves more like a normal text editor: the
- * document starts near the left edge while keeping the configured readable
- * maximum width. `!important` is deliberate because user/theme styles may load
- * after the engine stylesheet.
+ * Muya/MarkText historically centers a relatively narrow fixed-width writing
+ * column for long-form reading. mEdit behaves more like a general-purpose text
+ * editor: keep the document near the left edge, use a wider desktop column, and
+ * still allow a user-configured editor width to override the default.
  */
 .editor-component.mu-editor > .mu-container,
 .editor-component .mu-container {
+  width: 100% !important;
+  max-width: min(var(--editor-area-width, 1200px), 100%) !important;
   margin-left: 0 !important;
   margin-right: auto !important;
   padding-left: 24px !important;
+  padding-right: 24px !important;
 }
 
-/* Source mode should follow the same visual starting point. */
+/* Source mode follows the same left edge and desktop-width policy. */
 .editor-wrapper .CodeMirror-lines {
   padding-left: 24px;
+  padding-right: 24px;
+}
+
+.source-code .CodeMirror {
+  width: 100%;
+  max-width: var(--editorAreaWidth, 1200px) !important;
+  box-sizing: border-box;
 }
