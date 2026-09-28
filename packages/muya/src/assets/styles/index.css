@@ -11,8 +11,8 @@
     --editor-color-04: #f7f7f7;
     --editor-bg-color: rgb(255 255 255 / 100%);
 
-    /* maximum width of the left-aligned editing column (`.mu-container`) */
-    --editor-area-width: 800px;
+    /* mEdit's wider default editing column. User-configured width can still override it. */
+    --editor-area-width: 1200px;
     --delete-color: #ff6969;
     --icon-color: #6b737b;
     --code-block-bg-color: rgb(0 0 0 / 3%);
