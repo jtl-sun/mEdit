@@ -1,5 +1,20 @@
 # mEdit 변경 기록
 
+## 0.21.10
+
+- WYSIWYG 편집 영역의 기본 최대 폭을 800px에서 1200px로 확대
+- 창이 1200px보다 좁을 때는 사용 가능한 창 폭에 맞춰 자동 축소되도록 반응형 처리
+- 왼쪽 24px 시작 위치를 유지하고 오른쪽 여백도 24px로 맞춰 일반 편집기처럼 넓게 사용하도록 개선
+- Source Mode(CodeMirror)에도 동일한 1200px 기본 최대 폭 정책 적용
+- 사용자가 별도로 Editor Width를 지정한 경우 기존 사용자 설정을 계속 우선 적용
+- PicGo uploader에서 셸 명령 조합 대신 `execFile`을 사용하도록 변경하여 명령 주입 위험 완화
+
+## 0.21.9
+
+- 기존 멀티탭 구조를 활용해 여러 Markdown/Text 파일을 한 번에 열고 탭으로 전환할 수 있도록 정리
+- 편집 영역을 화면 가운데가 아니라 왼쪽 24px 지점에서 시작하도록 mEdit 전용 레이아웃 적용
+- Source Mode도 같은 왼쪽 시작 위치를 사용하도록 통일
+
 ## 0.21.8
 
 - Ubuntu의 **Markdown 빠른 안내서**에서 한글이 네모(□)로 표시되던 문제를 수정하고, 한글을 지원하는 Noto CJK/시스템 글꼴 fallback을 명시
@@ -39,7 +54,6 @@
 ## 0.21.3
 
 - Added an automated GitHub Release workflow that publishes Windows Setup/portable ZIP and Ubuntu AppImage/DEB installers for end users.
-
 - Added first-class Ubuntu x64 packaging for AppImage and DEB.
 - Added `build:linux:x64` and `build:linux:arm64` scripts.
 - Added GitHub Actions workflow to build and upload Ubuntu artifacts automatically.
