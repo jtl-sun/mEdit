@@ -61,10 +61,16 @@ jobs:
       - name: Verify TypeScript
         run: pnpm --filter marktext typecheck
 
+      - name: Test editor width and document lifecycle
+        run: pnpm --filter marktext exec vitest run test/unit/specs/editor-theme-style.spec.ts test/unit/specs/editor-store-close-file.spec.ts
+
       - name: Build Ubuntu AppImage and DEB
         run: pnpm build:linux:x64
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Verify editor behavior on Ubuntu
+        run: xvfb-run -a pnpm --filter marktext exec playwright test --config test/e2e/playwright.config.ts test/e2e/editor-width-new-file.spec.ts test/e2e/tabs.spec.ts
 
       - name: Verify Ubuntu package and launcher
         run: |

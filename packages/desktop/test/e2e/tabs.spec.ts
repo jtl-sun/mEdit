@@ -409,19 +409,23 @@ test.describe('Tab management', () => {
         .toEqual([keepId])
 
       // --- close-saved: every saved tab closes ---
-      // Top up to several SAVED tabs again, then close-saved -> none survive.
+      // Top up to several SAVED tabs again, then close-saved -> one fresh blank file.
       await openSavedTabs(['saved A\n', 'saved B\n'])
       ids = await readTabIds(cPage)
       expect(ids.length).toBeGreaterThanOrEqual(3)
       expect(await callEditorStoreAction(cPage, 'CLOSE_SAVED_TABS')).toBe(true)
-      await expect.poll(() => readTabIds(cPage), { timeout: 5000 }).toEqual([])
+      await expect(cPage.locator(tabSelector)).toHaveCount(1)
+      expect(ids).not.toContain(await activeTabId(cPage))
+      expect(await getMarkdownContent(cPage, cApp)).toBe('')
 
-      // --- close-all: all remaining tabs close ---
+      // --- close-all: all remaining tabs are replaced by a blank file ---
       await openSavedTabs(['final A\n', 'final B\n', 'final C\n'])
       ids = await readTabIds(cPage)
       expect(ids.length).toBeGreaterThanOrEqual(3)
       expect(await callEditorStoreAction(cPage, 'CLOSE_ALL_TABS')).toBe(true)
-      await expect.poll(() => readTabIds(cPage), { timeout: 5000 }).toEqual([])
+      await expect(cPage.locator(tabSelector)).toHaveCount(1)
+      expect(ids).not.toContain(await activeTabId(cPage))
+      expect(await getMarkdownContent(cPage, cApp)).toBe('')
     } finally {
       await cApp.close()
     }

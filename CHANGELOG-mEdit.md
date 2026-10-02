@@ -1,5 +1,15 @@
 # mEdit 변경 기록
 
+## 0.21.11
+
+- 테마의 750px 폭 제한을 덮어쓰도록 수정하고 WYSIWYG/Source Mode의 기본 편집 폭을 창 전체로 확대
+- Preferences > Editor에 Full Window, 1600px, 1200px, 120ch, 80ch 프리셋과 직접 폭 입력 제공
+- 빈 폭 설정은 테마와 관계없이 창 전체를 사용하며 고정 폭은 좌우 24px 여백을 포함해 반응형 처리
+- File > New Tab을 New File로, Close Tab을 Close File로 명확히 표시하고 탭의 새 파일/닫기 버튼을 기본 표시
+- 기본 시작 동작을 새 빈 파일로 변경; 0.21.10 이하에서 Restore all을 사용하던 설치에도 한 번 적용
+- Preferences > General > Startup에서 이전 세션 복원을 다시 선택할 수 있으며 기존 미저장 버퍼는 삭제하지 않음
+- 마지막 파일을 닫으면 새 빈 문서를 생성하고 미저장 문서의 Save/Don't Save/Cancel 흐름 유지
+
 ## 0.21.10
 
 - WYSIWYG 편집 영역의 기본 최대 폭을 800px에서 1200px로 확대

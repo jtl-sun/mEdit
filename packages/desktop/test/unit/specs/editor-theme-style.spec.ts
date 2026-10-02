@@ -73,55 +73,31 @@ describe('theme.ts style injection helpers', () => {
     })
   })
 
-  // Item 209 — setEditorWidth validates input and injects --editorAreaWidth override.
   describe('setEditorWidth', () => {
-    const WIDTH_STYLE_ID = 'editor-width'
-
-    it.each(['60ch', '800px', '50%'])(
-      'writes a calc() override for the valid value %s',
-      (value) => {
-        setEditorWidth(value)
-
-        expect(styleHtml(WIDTH_STYLE_ID)).toBe(
-          `:root { --editorAreaWidth: calc(100px + ${value}); --editor-area-width: calc(100px + ${value}); }`
-        )
-      }
-    )
-
-    it('overrides the active @muyajs/core width variable, not only the legacy one', () => {
-      // The WYSIWYG engine reads the kebab-case `--editor-area-width`
-      // (`.mu-container` max-width); the legacy camelCase `--editorAreaWidth`
-      // only reaches source mode. Both must be set or the preference is a no-op
-      // on the default theme (issue #4828).
-      setEditorWidth('60%')
-
-      expect(styleHtml(WIDTH_STYLE_ID)).toContain('--editor-area-width: calc(100px + 60%);')
+    const widthStyle = () => styleHtml('editor-width')
+    it.each(['60ch', '800px'])('adds only the actual margins for %s', (value) => {
+      setEditorWidth(value)
+      expect(widthStyle()).toContain('--editor-area-width: calc(48px + ' + value + ');')
+      expect(widthStyle()).toContain('--editorAreaWidth: calc(48px + ' + value + ');')
     })
-
-    it('clears the override (empty innerHTML) for an empty string', () => {
+    it.each(['50%', '100%'])('keeps %s within the editor area', (value) => {
+      setEditorWidth(value)
+      expect(widthStyle()).toContain('--editor-area-width: ' + value + ';')
+      expect(widthStyle()).not.toContain('calc(')
+    })
+    it.each(['', 'abc', '0px', '10', '10em'])('uses the full-width default for %s', (value) => {
       setEditorWidth('800px')
-      setEditorWidth('')
-
-      expect(styleHtml(WIDTH_STYLE_ID)).toBe('')
+      setEditorWidth(value)
+      expect(widthStyle()).toContain('--editor-area-width: 100%;')
     })
-
-    it.each(['abc', '10', '10em'])(
-      'rejects the invalid value %s and writes nothing',
-      (value) => {
-        setEditorWidth(value)
-
-        expect(styleHtml(WIDTH_STYLE_ID)).toBe('')
-      }
-    )
-
+    it('sets both hosts, preventing theme root variables from narrowing either mode', () => {
+      setEditorWidth('')
+      expect(widthStyle()).toContain('.editor-component, .source-code')
+    })
     it('reuses a single style element across calls', () => {
       setEditorWidth('60ch')
       setEditorWidth('50%')
-      setEditorWidth('abc')
-
-      expect(styleCount(WIDTH_STYLE_ID)).toBe(1)
-      // the invalid final call cleared the previously valid override
-      expect(styleHtml(WIDTH_STYLE_ID)).toBe('')
+      expect(styleCount('editor-width')).toBe(1)
     })
   })
 })

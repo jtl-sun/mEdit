@@ -2087,10 +2087,12 @@ onBeforeUnmount(() => {
 }
 
 .editor-component .mu-container {
+  width: 100%;
+  padding-left: 24px;
+  padding-right: 24px;
   padding-top: 20px;
   padding-bottom: 100vh;
-  /* Keep the readable document width, but anchor it to the left edge of the
-     editor instead of centering it in wide windows. */
+  /* Anchor the configurable document width to the left edge. */
   margin-left: 0;
   margin-right: auto;
 }

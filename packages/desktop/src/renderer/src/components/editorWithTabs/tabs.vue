@@ -22,6 +22,7 @@
           <span class="unsaved-dot" />
           <el-icon
             class="close-icon"
+            title="Close File"
             :size="12"
             @click.stop="removeFileInTab(file)"
           >
@@ -32,6 +33,7 @@
     </div>
     <div
       class="new-file"
+      title="New File"
       @click.stop="newFile()"
     >
       <el-icon :size="16">
@@ -78,12 +80,7 @@ const selectFile = (file: IFileState) => {
 }
 
 const removeFileInTab = (file: IFileState) => {
-  const { isSaved } = file
-  if (isSaved) {
-    editorStore.FORCE_CLOSE_TAB(file)
-  } else {
-    editorStore.CLOSE_UNSAVED_TAB(file)
-  }
+  editorStore.CLOSE_TAB(file)
 }
 
 // Original methods
@@ -316,7 +313,7 @@ onBeforeUnmount(() => {
       color: var(--editorColor30) !important;
     }
     & > .close-icon {
-      opacity: 0;
+      opacity: 1;
     }
     &:focus {
       outline: none;
@@ -347,7 +344,7 @@ onBeforeUnmount(() => {
   }
   & > li.unsaved:not(.active) {
     & > .close-icon {
-      opacity: 0;
+      opacity: 1;
     }
     & > .unsaved-dot {
       display: block;
@@ -390,7 +387,7 @@ onBeforeUnmount(() => {
   justify-content: space-around;
   cursor: pointer;
   color: var(--editorColor50);
-  opacity: 0;
+  opacity: 1;
   &.always-visible {
     opacity: 1;
   }

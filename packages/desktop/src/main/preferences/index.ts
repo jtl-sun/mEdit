@@ -59,6 +59,14 @@ class Preference extends TypedEmitter<PreferenceEvents> {
           if (store.get('titleBarStyle') === 'custom') {
             store.set('titleBarStyle', 'native')
           }
+        },
+        // Adopt the new startup behavior once on upgrade. Buffer files are
+        // retained; users can re-enable Restore all to recover a prior session.
+        '0.21.11': (store) => {
+          if (store.get('startUpAction') === 'restoreAll') {
+            store.set('startUpAction', 'blank')
+          }
+          store.set('tabBarVisibility', true)
         }
       },
       beforeEachMigration: (_store, context) => {

@@ -9,7 +9,7 @@
   "wordWrapInToc": false,
   "fileSortBy": "created",
   "fileSortOrder": "asc",
-  "startUpAction": "restoreAll",
+  "startUpAction": "blank",
   "restoreLayoutState": true,
   "defaultDirectoryToOpen": "",
   "lastOpenedFolder": "",
@@ -68,7 +68,7 @@
   "spellcheckerLanguage": "en-US",
 
   "sideBarVisibility": false,
-  "tabBarVisibility": false,
+  "tabBarVisibility": true,
   "sourceCodeModeEnabled": false,
   "openedFilesInSidebar": true,
 

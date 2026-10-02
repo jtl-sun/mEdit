@@ -959,6 +959,10 @@ export const useEditorStore = defineStore('editor', {
       const target = file ?? this.currentFile
       if (target === null) return
 
+      // Commit edits queued in Muya's current frame before deciding whether
+      // closing requires Save / Don't Save / Cancel.
+      if (target.id === this.currentFile?.id) this.flushActiveEditor()
+
       if (target.isSaved) {
         this.FORCE_CLOSE_TAB(target)
       } else {
@@ -1041,6 +1045,7 @@ export const useEditorStore = defineStore('editor', {
       if (this.tabs.length === 0) {
         this.listToc = []
         this.toc = []
+        this.NEW_UNTITLED_TAB({ selected: true })
       }
 
       const { pathname } = file
@@ -1130,6 +1135,7 @@ export const useEditorStore = defineStore('editor', {
       if (this.tabs.length === 0) {
         this.listToc = []
         this.toc = []
+        this.NEW_UNTITLED_TAB({ selected: true })
       }
       debouncedSendBufferedState()
     },

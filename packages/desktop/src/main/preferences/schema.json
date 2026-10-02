@@ -60,7 +60,7 @@
   "startUpAction": {
     "description": "General--The action after mEdit startup, open the last opened folder, open the specified folder or blank page",
     "enum": ["folder", "openLastFolder", "blank", "restoreAll"],
-    "default": "restoreAll"
+    "default": "blank"
   },
   "defaultDirectoryToOpen": {
     "description": "General--The default directory that should be opened on startup when startUp=folder.",
@@ -99,7 +99,7 @@
   "editorLineWidth": {
     "description": "Editor--Defines the maximum editor area width. An empty string or suffixes of ch (characters), px (pixels) or % (percentage) are allowed.",
     "type": "string",
-    "pattern": "^(?:$|[0-9]+(?:ch|px|%)$)",
+    "pattern": "^(?:$|[1-9][0-9]*(?:ch|px|%)$)",
     "default": ""
   },
   "codeFontSize": {
@@ -362,7 +362,7 @@
   "tabBarVisibility": {
     "description": "View--Whether the tabs are shown.--internal",
     "type": "boolean",
-    "default": false
+    "default": true
   },
   "sourceCodeModeEnabled": {
     "description": "View--Whether the source-code mode is enabled by default.--internal",

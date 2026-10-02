@@ -149,7 +149,7 @@ export const usePreferencesStore = defineStore('preferences', {
     wordWrapInToc: false,
     fileSortBy: 'created',
     fileSortOrder: 'asc',
-    startUpAction: 'restoreAll',
+    startUpAction: 'blank',
     restoreLayoutState: true,
     defaultDirectoryToOpen: '',
     lastOpenedFolder: '',
@@ -210,7 +210,7 @@ export const usePreferencesStore = defineStore('preferences', {
 
     // Default values that are overwritten with the entries below.
     sideBarVisibility: false,
-    tabBarVisibility: false,
+    tabBarVisibility: true,
     sourceCodeModeEnabled: false,
     openedFilesInSidebar: true,
 

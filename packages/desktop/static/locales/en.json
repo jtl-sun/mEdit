@@ -7,7 +7,7 @@
     },
     "file": {
       "file": "File",
-      "newTab": "New Tab",
+      "newTab": "New File",
       "newWindow": "New Window",
       "openFile": "Open File...",
       "openFolder": "Open Folder...",
@@ -23,7 +23,7 @@
       "exportPdf": "Export as PDF",
       "import": "Import",
       "print": "Print",
-      "closeTab": "Close Tab",
+      "closeTab": "Close File",
       "closeWindow": "Close Window",
       "quit": "Quit",
       "preferences": "Preferences"
@@ -457,13 +457,13 @@
         "title": "Startup Options",
         "layoutOptions": "Layout Options",
         "startupFilesFolders": "Startup Files/Folders",
-        "restorePreviousState": "Restore previous editor state",
+        "restorePreviousState": "Restore window layout (does not reopen files)",
         "openBlankState": "Open blank state",
         "openDefaultDirectory": "Open default directory",
         "openLastFolder": "Restore opened folder",
         "restoreAll": "Restore all opened files and folders",
         "selectFolder": "Select Folder",
-        "openBlankPage": "Open blank page"
+        "openBlankPage": "Start with a new blank file (Default)"
       },
       "sidebar": {
         "title": "Sidebar",
@@ -509,8 +509,8 @@
         "fontSize": "Font size",
         "lineHeight": "Line height",
         "fontFamily": "Font family",
-        "maxWidth": "Max width",
-        "maxWidthNotes": "Maximum width of editor content"
+        "maxWidth": "Editor Width",
+        "maxWidthNotes": "Applies to both editing modes. Leave empty for full window width, or enter 1600px, 120ch or 100%. ch is approximate: character count depends on font, size and language. Changes apply immediately."
       },
       "codeBlock": {
         "title": "Code Block",
@@ -738,7 +738,7 @@
     },
     "file": {
       "newWindow": "New Window",
-      "newTab": "New Tab",
+      "newTab": "New File",
       "openFile": "Open File",
       "openFolder": "Open Folder",
       "save": "Save",
@@ -751,7 +751,7 @@
       "trailingNewline": "Trailing Newline",
       "print": "Print",
       "preferences": "Preferences",
-      "closeTab": "Close Tab",
+      "closeTab": "Close File",
       "closeWindow": "Close Window",
       "quit": "Quit",
       "toggleAutoSave": "Toggle Auto Save",

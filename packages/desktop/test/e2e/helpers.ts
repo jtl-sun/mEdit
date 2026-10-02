@@ -22,9 +22,6 @@ const getTempPath = (suffix = ''): string => {
 }
 
 export const getElectronPath = (): string => {
-  if (process.platform === 'win32') {
-    return path.resolve(path.join('node_modules', '.bin', 'electron.cmd'))
-  }
   const pathTxt = path.join(projectRoot, 'node_modules/electron/path.txt')
   const relPath = fs.readFileSync(pathTxt, 'utf-8').trim()
   return path.join(projectRoot, 'node_modules/electron/dist', relPath)
@@ -53,6 +50,8 @@ export interface LaunchResult {
 }
 
 export interface LaunchOptions {
+  // Allows restart/upgrade tests to reuse an isolated temporary profile.
+  userDataDir?: string
   // When true, sets MARKTEXT_ERROR_INTERACTION=1 in the launch env so
   // src/main/exceptionHandler.ts suppresses the modal "Unexpected error"
   // dialog. Only crash-guard specs that explicitly call expectNoRendererErrors
@@ -69,7 +68,7 @@ export const launchElectron = async(
   const executablePath = getElectronPath()
   // Pass project root as entry so Electron reads package.json and getAppPath() returns project root.
   // Passing out/main/index.js directly bypasses package.json and breaks __static path resolution.
-  const userDataDir = trackTempDir(getTempPath())
+  const userDataDir = trackTempDir(options.userDataDir ?? getTempPath())
   const args = [projectRoot, '--user-data-dir', userDataDir].concat(userArgs)
   const env: Record<string, string> = {}
   for (const [k, v] of Object.entries(process.env)) if (v !== undefined) env[k] = v

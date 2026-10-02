@@ -199,14 +199,13 @@ export const addThemeStyle = (theme: string): void => {
 
 export const setEditorWidth = (value: string): void => {
   const EDITOR_WIDTH_STYLE_ID = 'editor-width'
-  let result = ''
-  if (value && /^[0-9]+(?:ch|px|%)$/.test(value)) {
-    // Add 100px for the container's horizontal padding. Set both the legacy
-    // camelCase var (source mode) and the kebab-case var the active
-    // @muyajs/core engine reads for `.mu-container` max-width (issue #4828).
-    const width = `calc(100px + ${value})`
-    result = `:root { --editorAreaWidth: ${width}; --editor-area-width: ${width}; }`
-  }
+  // Empty means full width, independent of the active theme. Fixed values
+  // describe text width; add the two 24px margins. Percentages describe the
+  // available editor area, so 100% must never exceed the viewport.
+  const valid = /^[1-9][0-9]*(?:ch|px|%)$/.test(value)
+  const width = !valid ? '100%' : value.endsWith('%') ? value : `calc(48px + ${value})`
+  // Host-level variables also override themes loaded after this style.
+  const result = `.editor-component, .source-code { --editorAreaWidth: ${width}; --editor-area-width: ${width}; }`
   let styleEle = document.querySelector(`#${EDITOR_WIDTH_STYLE_ID}`) as HTMLStyleElement | null
   if (!styleEle) {
     styleEle = document.createElement('style')

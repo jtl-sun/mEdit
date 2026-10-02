@@ -421,6 +421,9 @@ onBeforeUnmount(() => {
   overflow: auto;
 }
 .source-code .CodeMirror {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 0 24px;
   height: auto;
   margin: 50px 0;
   max-width: var(--editorAreaWidth);
