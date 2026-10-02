@@ -1,6 +1,6 @@
 import path from 'path'
 import { BrowserWindow, dialog, ipcMain } from 'electron'
-import type { BrowserWindowConstructorOptions } from 'electron'
+import type { BrowserWindowConstructorOptions, Event as ElectronEvent } from 'electron'
 import log from 'electron-log'
 import windowStateKeeper from 'electron-window-state'
 import { isChildOfDirectory, isSamePathSync } from 'common/filesystem/paths'
@@ -161,7 +161,7 @@ class EditorWindow extends BaseWindow {
       showEditorContextMenu(win!, event, params, preferences.getItem('spellcheckerEnabled'))
     })
 
-    win.webContents.once('did-finish-load', () => {
+    this._onceRendererReady(() => {
       this.lifecycle = WindowLifecycle.READY
       this.emit('window-ready')
 
@@ -203,7 +203,7 @@ class EditorWindow extends BaseWindow {
       )
     })
 
-    win.webContents.once('render-process-gone', async (_event, { reason }) => {
+    win.webContents.once('render-process-gone', async(_event, { reason }) => {
       if (reason === 'clean-exit') {
         return
       }
@@ -481,7 +481,7 @@ class EditorWindow extends BaseWindow {
     this._openedRootDirectory = ''
     this._openedFiles = []
 
-    browserWindow!.webContents.once('did-finish-load', () => {
+    this._onceRendererReady(() => {
       this.lifecycle = WindowLifecycle.READY
       const { preferences } = this._accessor
       const { sideBarVisibility, restoreLayoutState, tabBarVisibility, sourceCodeModeEnabled } =
@@ -500,6 +500,25 @@ class EditorWindow extends BaseWindow {
 
     this.lifecycle = WindowLifecycle.LOADING
     super.reload()
+  }
+
+  // Vue's asynchronous setup can finish after did-finish-load. Bootstrap only
+  // after the editor has registered all IPC listeners, including on reload.
+  private _onceRendererReady(callback: () => void): void {
+    const browserWindow = this.browserWindow
+    if (!browserWindow) return
+    const contents = browserWindow.webContents
+    const cleanup = (): void => {
+      contents.removeListener('ipc-message', onReady)
+    }
+    const onReady = (_event: ElectronEvent, channel: string): void => {
+      if (channel !== 'mt::editor-ready') return
+      cleanup()
+      contents.removeListener('destroyed', cleanup)
+      callback()
+    }
+    contents.on('ipc-message', onReady)
+    contents.once('destroyed', cleanup)
   }
 
   override destroy(): void {

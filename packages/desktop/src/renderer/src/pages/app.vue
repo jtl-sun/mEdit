@@ -204,6 +204,9 @@ onMounted(async () => {
 
   setupDragDropHandler()
 
+  // Main may finish loading before this async setup has registered listeners.
+  window.electron.ipcRenderer.send('mt::editor-ready')
+
   nextTick(() => {
     // `initialState` from bootstrap carries nullable URL params (string|null);
     // `addStyles` requires non-null `theme` / `codeFontFamily` strings.
