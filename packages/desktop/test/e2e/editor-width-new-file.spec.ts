@@ -21,7 +21,8 @@ const clickFileMenu = (app: ElectronApplication, label: string) =>
 
 const width = (page: Page, selector: string) => page.locator(selector).evaluate((element) => ({
   width: element.getBoundingClientRect().width,
-  parent: element.parentElement!.getBoundingClientRect().width,
+  // Compare available content space, excluding the parent's scrollbar.
+  parent: element.parentElement!.clientWidth,
   maxWidth: getComputedStyle(element).maxWidth
 }))
 
@@ -70,13 +71,13 @@ test('New File and Close File work with the first and last documents', async() =
   try {
     await expect(page.locator(tabs)).toHaveCount(1)
     await expect(page.locator('.editor-tabs')).toBeVisible()
-    await expect(page.locator('.close-icon')).toBeVisible()
+    await expect(page.locator('.editor-tabs .close-icon')).toBeVisible()
     const initialId = await page.locator(tabs).getAttribute('data-id')
     await clickFileMenu(app, 'New File')
     await expect(page.locator(tabs)).toHaveCount(2)
     await clickFileMenu(app, 'Close File')
     await expect(page.locator(tabs)).toHaveCount(1)
-    await page.locator('.close-icon').click()
+    await page.locator('.editor-tabs .close-icon').click()
     await expect(page.locator(tabs)).toHaveCount(1)
     await expect(page.locator(tabs)).not.toHaveAttribute('data-id', initialId!)
     await expect(page.locator('.mu-editor')).toHaveText('')
@@ -96,7 +97,7 @@ test('Preferences displays the default width preset and applies presets and cust
     await expect(preset).toContainText('Full Window (Default)')
     await preset.locator('.el-select').click()
     await settings.locator('.el-select-dropdown__item').filter({ hasText: 'Wide (1600px)' }).click()
-    await expect.poll(async() => (await width(page, '.mu-container')).maxWidth).toBe('1648px')
+    await expect.poll(async() => (await width(page, '.mu-container')).maxWidth).toBe('min(1648px, 100%)')
     const custom = settings.locator('.pref-text-box-item').filter({ hasText: 'Editor Width' })
     await custom.locator('input').fill('80ch')
     await expect.poll(() => page.locator('.editor-component').evaluate((element) =>
