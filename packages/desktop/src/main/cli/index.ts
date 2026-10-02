@@ -12,7 +12,15 @@ const cli = (): ParsedArgs => {
   // Unpackaged Electron includes the application entry path before user
   // arguments. Treating it as a folder prevents blank-file startup and
   // unnecessarily watches the source tree during preview/test launches.
-  let argv = process.argv.slice(app.isPackaged ? 1 : 2)
+  let argv = process.argv.slice(1)
+  if (!app.isPackaged) {
+    // Electron may place inspector flags before the application entry path.
+    // Remove the entry by identity rather than assuming its argument index.
+    const entryIndex = argv.findIndex((value) =>
+      !value.startsWith('-') && path.resolve(value) === path.resolve(app.getAppPath())
+    )
+    if (entryIndex !== -1) argv.splice(entryIndex, 1)
+  }
   if (process.env.NODE_ENV === 'development') {
     // Don't pass Electron development arguments to mEdit and change user data path.
     argv = ['--user-data-dir', path.join(getPath('appData'), 'medit-dev')]

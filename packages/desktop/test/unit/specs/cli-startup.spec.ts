@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, afterEach } from 'vitest'
+import path from 'path'
 
 const mockApp = vi.hoisted(() => ({ isPackaged: false, getAppPath: () => '/app' }))
 vi.mock('electron', () => ({ app: mockApp }))
@@ -13,6 +14,12 @@ afterEach(() => {
 })
 
 describe('startup file arguments', () => {
+  it('ignores the entry path after Electron inspector flags', () => {
+    mockApp.isPackaged = false
+    process.argv = ['electron', '--inspect=0', '--remote-debugging-port=0', '/app', '--user-data-dir', '/profile']
+    expect(cli()._.filter((value) => !value.startsWith('--'))).toEqual([])
+    expect(cli()['--user-data-dir']).toBe(path.resolve('/profile'))
+  })
   it('ignores the Electron application entry path when no file is requested', () => {
     mockApp.isPackaged = false
     process.argv = ['electron', '/app', '--user-data-dir', '/profile']
