@@ -239,20 +239,19 @@ const {
 } = storeToRefs(preferenceStore)
 
 const widthPresets = [
-  { label: 'Full Window (Default)', value: '' },
+  { label: 'Full Window (Default)', value: 'full' },
   { label: 'Wide (1600px)', value: '1600px' },
   { label: 'Standard (1200px)', value: '1200px' },
   { label: 'Approximately 120 Characters', value: '120ch' },
   { label: 'Approximately 80 Characters', value: '80ch' },
   { label: 'Custom', value: 'custom' }
 ]
-const widthPreset = computed(() =>
-  widthPresets.some((preset) => preset.value === editorLineWidth.value)
-    ? editorLineWidth.value
-    : 'custom'
-)
+const widthPreset = computed(() => {
+  const value = editorLineWidth.value || 'full'
+  return widthPresets.some((preset) => preset.value === value) ? value : 'custom'
+})
 const onWidthPresetChange = (value: string | number | boolean): void => {
-  if (value !== 'custom') onSelectChange('editorLineWidth', value)
+  if (value !== 'custom') onSelectChange('editorLineWidth', value === 'full' ? '' : value)
 }
 
 const onSelectChange = (type: keyof PreferencesState, value: unknown): void => {

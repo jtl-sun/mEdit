@@ -60,7 +60,15 @@ jobs:
         run: pnpm --filter marktext typecheck
 
       - name: Test editor width and document lifecycle
-        run: pnpm --filter marktext exec vitest run test/unit/specs/editor-theme-style.spec.ts test/unit/specs/editor-store-close-file.spec.ts
+        run: pnpm --filter marktext exec vitest run test/unit/specs/editor-theme-style.spec.ts test/unit/specs/editor-store-close-file.spec.ts test/unit/specs/cli-startup.spec.ts
+
+      - name: Build app for behavior checks
+        run: pnpm build:unpack
+
+      - name: Verify editor behavior on Windows
+        run: pnpm --filter marktext exec playwright test --config test/e2e/playwright.config.ts test/e2e/editor-width-new-file.spec.ts test/e2e/tabs.spec.ts
+        env:
+          DEBUG: pw:browser
 
       - name: Build Windows installer
         shell: pwsh
@@ -68,8 +76,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Verify editor behavior on Windows
-        run: pnpm --filter marktext exec playwright test --config test/e2e/playwright.config.ts test/e2e/editor-width-new-file.spec.ts test/e2e/tabs.spec.ts
 
       - name: Verify Windows packages
         shell: pwsh
@@ -146,15 +152,21 @@ jobs:
         run: pnpm --filter marktext typecheck
 
       - name: Test editor width and document lifecycle
-        run: pnpm --filter marktext exec vitest run test/unit/specs/editor-theme-style.spec.ts test/unit/specs/editor-store-close-file.spec.ts
+        run: pnpm --filter marktext exec vitest run test/unit/specs/editor-theme-style.spec.ts test/unit/specs/editor-store-close-file.spec.ts test/unit/specs/cli-startup.spec.ts
+
+      - name: Build app for behavior checks
+        run: pnpm build:unpack
+
+      - name: Verify editor behavior on Ubuntu
+        run: xvfb-run -a pnpm --filter marktext exec playwright test --config test/e2e/playwright.config.ts test/e2e/editor-width-new-file.spec.ts test/e2e/tabs.spec.ts
+        env:
+          DEBUG: pw:browser
 
       - name: Build Ubuntu AppImage and DEB
         run: pnpm build:linux:x64
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Verify editor behavior on Ubuntu
-        run: xvfb-run -a pnpm --filter marktext exec playwright test --config test/e2e/playwright.config.ts test/e2e/editor-width-new-file.spec.ts test/e2e/tabs.spec.ts
 
       - name: Verify Ubuntu package and launcher
         run: |

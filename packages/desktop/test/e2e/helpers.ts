@@ -81,6 +81,16 @@ export const launchElectron = async(
     env,
     timeout: 30000
   })
+  // Tests use isolated temporary profiles. Discard remaining test edits only
+  // during teardown; regular Close File actions still exercise real prompts.
+  // With blank startup as the default, app.close() otherwise waits on Save.
+  const closeApp = app.close.bind(app)
+  app.close = async() => {
+    await app.evaluate(({ dialog }) => {
+      dialog.showMessageBox = async() => ({ response: 1, checkboxChecked: false })
+    })
+    await closeApp()
+  }
   if (options.suppressErrorDialog) await installRendererErrorCounter(app)
   const page = await app.firstWindow()
   await page.waitForLoadState('domcontentloaded')

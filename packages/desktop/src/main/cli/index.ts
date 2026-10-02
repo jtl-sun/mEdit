@@ -9,7 +9,10 @@ const write = (s: string): boolean => process.stdout.write(s)
 const writeLine = (s: string): boolean => write(s + '\n')
 
 const cli = (): ParsedArgs => {
-  let argv = process.argv.slice(1)
+  // Unpackaged Electron includes the application entry path before user
+  // arguments. Treating it as a folder prevents blank-file startup and
+  // unnecessarily watches the source tree during preview/test launches.
+  let argv = process.argv.slice(app.isPackaged ? 1 : 2)
   if (process.env.NODE_ENV === 'development') {
     // Don't pass Electron development arguments to mEdit and change user data path.
     argv = ['--user-data-dir', path.join(getPath('appData'), 'medit-dev')]

@@ -85,6 +85,35 @@ test('New File and Close File work with the first and last documents', async() =
   }
 })
 
+test('Preferences displays the default width preset and applies presets and custom values', async() => {
+  const { app, page } = await launchElectron()
+  try {
+    const settingsWindow = app.waitForEvent('window')
+    await clickFileMenu(app, 'Preferences')
+    const settings = await settingsWindow
+    await settings.locator('.pref-sidebar .category .item').filter({ hasText: /^Editor$/ }).click()
+    const preset = settings.locator('.pref-select-item').filter({ hasText: 'Editor Width Preset' })
+    await expect(preset).toContainText('Full Window (Default)')
+    await preset.locator('.el-select').click()
+    await settings.locator('.el-select-dropdown__item').filter({ hasText: 'Wide (1600px)' }).click()
+    await expect.poll(async() => (await width(page, '.mu-container')).maxWidth).toBe('1648px')
+    const custom = settings.locator('.pref-text-box-item').filter({ hasText: 'Editor Width' })
+    await custom.locator('input').fill('80ch')
+    await expect.poll(() => page.locator('.editor-component').evaluate((element) =>
+      getComputedStyle(element).getPropertyValue('--editor-area-width').trim()
+    )).toBe('calc(48px + 80ch)')
+    await expect(preset).toContainText('Approximately 80 Characters')
+    await preset.locator('.el-select').click()
+    await settings.locator('.el-select-dropdown__item').filter({ hasText: 'Full Window (Default)' }).click()
+    await expect.poll(async() => {
+      const measured = await width(page, '.mu-container')
+      return Math.abs(measured.width - measured.parent)
+    }).toBeLessThan(2)
+  } finally {
+    await app.close()
+  }
+})
+
 test('upgrade starts blank, preserves unsaved recovery data and permits opting into restore', async() => {
   const userDataDir = mkdtempSync(join(tmpdir(), 'medit-startup-'))
   const preferencesFile = join(userDataDir, 'preferences.json')
